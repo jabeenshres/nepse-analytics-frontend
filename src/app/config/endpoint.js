@@ -1,0 +1,15 @@
+export const stock_recent_endpoint = "api/admin/recent/";
+
+export const stock_detail_endpoint = "api/admin/share/";
+
+export const stock_load_endpoint = "load_stock_data/";
+
+export const stock_predict_endpoint = "predict/";
+
+export const login = "api/token/";
+
+export const refresh_token = "api/token/refresh/";
+
+// export const url_filter = "api/admin/recent/?search=s&gainer=1/"; YO params sanga pass garna milxa paxi heroola
+
+
