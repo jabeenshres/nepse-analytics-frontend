@@ -10,7 +10,7 @@ export default function FetchTable({ datas }) {
     } else if (data.security_name.toLowerCase().includes(searchTerm.toLowerCase())) {
       return data
     }
-  })  
+  })
 
   return (
     <div className="container mx-auto p-4 rounded-lg">
@@ -29,7 +29,7 @@ export default function FetchTable({ datas }) {
         <table className="min-w-full shadow-xl rounded-lg">
           <thead className="bg-gray-200  top-0 z-10">
             <tr>
-                <th className="px-4 py-2 border border-gray-300 text-left">Stocks</th>
+              <th className="px-4 py-2 border border-gray-300 text-left">Stocks</th>
               <th className="px-4 py-2 border border-gray-300 text-left">
                 Company Name
               </th>
@@ -65,31 +65,28 @@ export default function FetchTable({ datas }) {
                 <td className="px-4 py-2 border border-gray-300">
                   {stock.security_name}
                 </td>
-                {stock.data.map((stockdata) => (
-                  <td className="px-4 py-2 border border-gray-300">
-                    {stockdata.open_price}
-                  </td>
-                ))}
-                {stock.data.map((stockdata) => (
-                  <td className="px-4 py-2 border border-gray-300">
-                    {stockdata.high_price}
-                  </td>
-                ))}
-                {stock.data.map((Stockdata) => (
-                  <td className="px-4 py-2 border border-gray-300">
-                    {Stockdata.low_price}
-                  </td>
-                ))}
-                {stock.data.map((stockdata) => (
-                  <td className="px-4 py-2 border border-gray-300">
-                    {stockdata.close_price}
-                  </td>
-                ))}
-                {stock.data.map((stockdata) => (
-                  <td className="px-4 py-2 border border-gray-300">
-                    {stockdata.last_updated_price}
-                  </td>
-                ))}
+                <td className="px-4 py-2 border border-gray-300">
+                  {stock.data[0].open_price}
+                </td>
+
+
+                <td className="px-4 py-2 border border-gray-300">
+                  {stock.data[0].high_price}
+                </td>
+
+                <td className="px-4 py-2 border border-gray-300">
+                  {stock.data[0].low_price}
+                </td>
+
+                <td className="px-4 py-2 border border-gray-300">
+                  {stock.data[0].close_price}
+                </td>
+
+
+                <td className="px-4 py-2 border border-gray-300">
+                  {stock.data[0].last_updated_price}
+                </td>
+
               </tr>
             ))}
           </tbody>

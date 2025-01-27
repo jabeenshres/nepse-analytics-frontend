@@ -10,7 +10,7 @@ import { authorization } from "../hoc/auth";
 
 
 export default async function Sharelist() {
-  authorization();
+  await authorization();
    const data = await axios.get(`${BASE_URL}${stock_recent_endpoint}`,{
     headers: {
       Authorization: `Bearer ${JSON.parse(await getCookies("token")).access}`,

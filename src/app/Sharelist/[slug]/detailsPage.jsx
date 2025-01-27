@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Candlestick from "@/components/CandleStick/candlestick";
-import { FaArrowLeft } from "react-icons/fa";
+
+// import { FaArrowLeft } from "react-icons/fa";
 import Link from "next/link";
 
 export default function Detailpage({ data = [] }) {
@@ -74,9 +74,7 @@ export default function Detailpage({ data = [] }) {
         </table>
       </div>
 
-      <div className="mt-20">
-        <Candlestick data={StockCandle} />
-      </div>
+     |
     </div>
   );
 }

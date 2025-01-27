@@ -1,6 +1,6 @@
 export const stock_recent_endpoint = "api/admin/recent/";
 
-export const stock_detail_endpoint = "api/admin/share/";
+export const stock_detail_endpoint = "api/admin/stock/";
 
 export const stock_load_endpoint = "load_stock_data/";
 
