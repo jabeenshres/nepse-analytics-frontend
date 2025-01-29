@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from "react";
 import { BASE_URL } from "../config/constraints";
-// import { Auth_URL, BASE_URL } from '../config/constraints';
+
 import axios from "axios";
 import { setCookies } from "@/app/utils/setCookies";
 import { login } from '../config/endpoint';
@@ -42,73 +42,44 @@ export default function Login() {
 
     return (
         <div>   
-            <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                    <div className="flex items-center justify-center text-4xl font-bold text-gray-900">
-                        <h1>SHARE NEPAL</h1>
-                    </div>
-                    <h2 className="mt-10 text-center text-2xl/9 font-thin font-serif tracking-tight text-gray-900">
-                        Login to your account
-                    </h2>
-                </div>
+            <section class="bg-gray-50 ">
+  <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+      <a href="../" class="flex font-bold items-center mb-6 text-2xl font-semibold text-gray-900 ">
+      <img src="/images/sharelogom.png" className="h-30 w-20 me-3 sm:h-15" alt="ShareNepal Logo" />
+          <h4 className='font-bold text-3xl'>SHARE NEPAL </h4>
+      </a>
+      <div class="w-full bg-white rounded-lg shadow-lg  md:mt-0 sm:max-w-md xl:p-0 ">
+          <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+              <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
+                  Sign in to your account
+              </h1>
+              <form class="space-y-4 md:space-y-6" onSubmit={handleLogin}>
 
-                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" onSubmit={handleLogin}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                                Email address
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="text"
-                                    name="email"
-                                    id="email"
-                                    autoComplete="email"
-                                    required
-                                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-600 sm:text-sm/6"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                />
-                            </div>
-                        </div>
+                
+                  <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-900">User Name:</label>
+                      <input type="text" name="username" id="username" className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" required="" value={username} onChange={(e)=>setUsername(e.target.value)}/>
+                  </div>
 
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
-                                    Password
-                                </label>
-                            </div>
-                            <div className="mt-2">
-                                <input
-                                    type="password"
-                                    name="password"
-                                    id="password"
-                                    autoComplete="current-password"
-                                    required
-                                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-600 sm:text-sm/6"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </div>
-                        </div>
+                  <div>
+                      <label className="block mb-2 text-sm font-medium text-gray-900 ">Password:</label>
+                      <input type="password" name="password" id="password" className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" required="" value={password}
+                      onChange={(e)=>setPassword(e.target.value)}/>
+                  </div>
 
+                  <button type="submit" class="w-full text-white bg-gray-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"> {isLoading ? "Loging in..." : "Log-in"}</button>
 
-
-                        <div>
-                            <button
-                                type="submit"
-                                className="flex w-full justify-center rounded-md bg-gray-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
-                            >
-                                {isLoading ? "Signing in..." : "Sign-in"}
-                            </button>
-                        </div>
-
-                        {error && (
+                  <p className="text-sm font-light text-gray-500  ">
+                      Don’t have an account yet? <a href="#" class="font-medium font-bold text-gray-600 hover:underline">Sign up</a>
+                  </p>
+                  {error && (
                             <p className="mt-2 text-center text-sm text-red-600 font-bold">{error}</p>
                         )}
-                    </form>
-                </div>
-            </div>
+              </form>
+          </div>
+      </div>
+  </div>
+</section>
         </div>
     );
 }

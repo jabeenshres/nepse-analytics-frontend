@@ -4,8 +4,6 @@ import Link from 'next/link'
 import React from 'react'
 
 function Homedesign({result}) {  
-
-
   return (
     <div>
           <section className='text-center p-12 bg-gradient-to-r from-blue-500 to-blue-600 text-white'>

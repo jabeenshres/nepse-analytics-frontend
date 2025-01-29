@@ -6,7 +6,7 @@ export const stock_load_endpoint = "load_stock_data/";
 
 export const stock_predict_endpoint = "predict/";
 
-export const login = "api/token/";
+export const login = "api/accounts/token/";
 
 export const refresh_token = "api/token/refresh/";
 

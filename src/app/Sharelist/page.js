@@ -1,25 +1,37 @@
 import React from "react";
-import { fetchData } from "../lib/api";
 import FetchTable from "./fetchtable";
-import { createAxiosInstance } from "../lib/api";
 import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
 import { getCookies } from "@/app/utils/setCookies";
 import { stock_recent_endpoint } from "../config/endpoint";
 import { authorization } from "../hoc/auth";
+import Pagination from "@/components/Pagination/pagination";
 
-
-export default async function Sharelist() {
+export default async function Sharelist({ searchParams }) {
   await authorization();
-   const data = await axios.get(`${BASE_URL}${stock_recent_endpoint}`,{
-    headers: {
-      Authorization: `Bearer ${JSON.parse(await getCookies("token")).access}`,
-    },
-   })  
-    return (
-        <div>
-           <FetchTable datas={data?.data?.results} />
-            {/* {data?.data?.results?.map((item, index) => (<div key={index}>{item.symbol}</div>))} */}
-        </div>
-    );
+
+  // Extract query parameters
+  const search = await searchParams?.search || "";
+  const gainer = await searchParams?.gainer || ""; // Optional gainer filter
+  const page = parseInt(searchParams?.page || "1", 10);
+
+  // Fetch data with page, search, and gainer parameters
+  const { data } = await axios.get(
+    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}`,
+    {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(await getCookies("token")).access}`,
+      },
+    }
+  );
+
+  const { results, count } = data;
+  const totalPages = Math.ceil(count / results.length);
+
+  return (
+    <div>
+      <FetchTable datas={results} searchTerm={search} gainer={gainer} />
+      <Pagination currentPage={page} totalPages={totalPages} />
+    </div>
+  );
 }

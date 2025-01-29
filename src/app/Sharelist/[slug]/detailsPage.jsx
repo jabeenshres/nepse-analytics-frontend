@@ -1,45 +1,42 @@
-"use client";
+"use client"
+import React from 'react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { FaArrowLeft } from 'react-icons/fa';
+import CandlestickChart from '@/components/CandleStick/candlestick';
 
-import React from "react";
+const ShareDataDisplay = ({ sharedata }) => {
+  // console.log("Sharedata:", sharedata);
 
-// import { FaArrowLeft } from "react-icons/fa";
-import Link from "next/link";
-
-export default function Detailpage({ data = [] }) {
-  // Ensure data is an array
-  if (!Array.isArray(data)) {
-    console.error("Invalid data format, expected an array:", data);
-    data = []; // Fallback to an empty array if it's not valid
+  if (!sharedata || !sharedata.data || !Array.isArray(sharedata.data) || sharedata.data.length === 0) {
+    return <div>No data available</div>;
   }
 
-  // Prepare candlestick data
-  const StockCandle = data.map((item) => ({
+  const validatedata = sharedata.data;
+  const initialvisible = 3 ;
+  const [visibleCount, setVisibleCount] = useState(initialvisible)
+  const StockCandle = validatedata.map((item) => ({
     x: new Date(item.date),
     y: [item.open_price, item.high_price, item.low_price, item.close_price],
   }));
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-center italic mb-6">
-        Stock Overview
-      </h1>
-
-      <div className="mb-8 border-b pb-4">
-        <div className="flex justify-between">
-          <h2 className="text-2xl font-semibold font-serif">
-            {data.security_name} ({data.symbol})
-          </h2>
-          <Link
-            href="../Sharelist"
-            className="flex flex-row items-center gap-2 text-blue-500 hover:text-blue-700 mr-20 text-lg font-bold"
-          >
+    <div className="p-4">
+      {/* Stock Details */}
+      <div className=" flex justify-between mb-6 p-4 border rounded-lg shadow-lg bg-gray-100">
+        <h1 className="text-3xl font-bold mb-2">{sharedata.security_name} ({sharedata.symbol})</h1>
+        <button className='bg-blue-700 rounded-full hover:bg-blue-500 text-white font-bold py-2 px-4 rounded '>
+        <Link href="../Sharelist" className="flex flex-row items-center gap-2 mr-20 text-lg font-bold">
             <FaArrowLeft />
             Back To ShareList
-          </Link>
-        </div>
+        </Link>
+        </button>
+       
+      </div>
 
-        <h3 className="text-xl mt-4 font-bold">Recent Trading Data</h3>
-        <table className="table-auto w-full bg-gray-200 text-left border-collapse mt-2">
+      {/* Stock Trading Data */}
+      <h2 className="text-2xl font-bold mb-4">Stock Trading Data</h2>
+      <table className="table-auto w-full bg-gray-200 text-left border-collapse mt-2">
           <thead>
             <tr className="border-b">
               <th className="px-4 py-2">Date</th>
@@ -52,14 +49,10 @@ export default function Detailpage({ data = [] }) {
             </tr>
           </thead>
           <tbody>
-            {data.map((entry, index) => (
+            {validatedata.slice(0, visibleCount).map((entry) => (
               <tr
-                key={index}
-                className={`border-b font-mono ${
-                  entry.close_price > entry.open_price
-                    ? "bg-green-500"
-                    : "bg-red-500"
-                }`}
+                key={entry.id}
+                className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
               >
                 <td className="px-4 py-2">{entry.date}</td>
                 <td className="px-4 py-2">{entry.open_price}</td>
@@ -72,9 +65,31 @@ export default function Detailpage({ data = [] }) {
             ))}
           </tbody>
         </table>
-      </div>
+        <div className='flex justify-between mt-4 space-x-4'>
+        {visibleCount < validatedata.length && (
+        <div className="text-center mt-4">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-lg hover:bg-blue-700 transition" onClick={() => setVisibleCount(visibleCount + 5)} > {/* Increase visible count by 5 */}
+            See More
+          </button>
+        </div>
+      )}
+        {
+          visibleCount > initialvisible && (
+            <div className="text-center mt-4">
+              <button className="px-4 py-2 bg-red-600 text-white rounded-md shadow-lg hover:bg-red-700 transition" onClick={() => setVisibleCount(initialvisible)} > {/* Reset visible count to initial value */}
+                See Less
+              </button>
+            </div>
+          )
+        }
+        </div>
 
-     |
+      {/* Stock Candlestick Chart */}
+        <div className="mt-20">
+        <CandlestickChart data={StockCandle} />
+      </div>
     </div>
   );
-}
+};
+
+export default ShareDataDisplay;
