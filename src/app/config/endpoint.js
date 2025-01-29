@@ -10,6 +10,9 @@ export const login = "api/accounts/token/";
 
 export const refresh_token = "api/token/refresh/";
 
+
+export const users_endpoint = "api/accounts/users/";
+
 // export const url_filter = "api/admin/recent/?search=s&gainer=1/"; YO params sanga pass garna milxa paxi heroola
 
 
