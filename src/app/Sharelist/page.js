@@ -8,7 +8,7 @@ import { authorization } from "../hoc/auth";
 import Pagination from "@/components/Pagination/pagination";
 
 export default async function Sharelist({ searchParams }) {
-  await authorization();
+  const token=await authorization();
 
   // Extract query parameters
   const searchparam = await searchParams
@@ -21,7 +21,7 @@ export default async function Sharelist({ searchParams }) {
     `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}`,
     {
       headers: {
-        Authorization: `Bearer ${JSON.parse(await getCookies("token")).access}`,
+        Authorization: `Bearer ${token.access}`,
       },
     }
   );

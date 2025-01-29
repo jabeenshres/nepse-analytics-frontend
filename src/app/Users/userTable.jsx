@@ -1,9 +1,5 @@
-"use client";
 import RoleCheckBox from "@/components/RoleCheckBox/roleCheckBox";
 export default function UserTable({ datas }) {
-    const handleChange=(e)=>{
-
-    }
   return (
     <div className="container mx-auto p-4 rounded-lg">
       {/* Search and Gainer Controls */}

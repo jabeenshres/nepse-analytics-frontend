@@ -7,7 +7,7 @@ import { getCookies } from "@/app/utils/setCookies";
 import { authorization } from "@/app/hoc/auth";
 
 export default async function Page({ params }) {
-  await authorization();
+  const token = await authorization();
 
   const {slug} = await params;
 
@@ -17,7 +17,7 @@ export default async function Page({ params }) {
     {
       headers: {
         Authorization: `Bearer ${
-          JSON.parse(await getCookies("token")).access
+          token.access
         }`,
       },
     }

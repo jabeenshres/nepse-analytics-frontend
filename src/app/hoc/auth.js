@@ -12,7 +12,7 @@ export const authorization = async () => {
   if (!Token) {
     redirect("/Login");
   }
-  return Token?.value;
+  return JSON.parse(Token?.value);
 
    
 };

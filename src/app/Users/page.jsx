@@ -8,8 +8,7 @@ import { authorization } from "../hoc/auth";
 import { redirect } from "next/navigation";
 
 export default async function Sharelist() {
-  const tokenstring = await authorization();
-  const token = JSON.parse(tokenstring)
+  const token = await authorization();
   console.log("role",token.role)
 
   if (token.role !== "admin") {

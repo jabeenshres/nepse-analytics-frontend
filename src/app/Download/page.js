@@ -1,11 +1,19 @@
-import React from 'react'
+import React from "react";
+import { authorization } from "../hoc/auth";
+import { redirect } from "next/navigation";
+import DownloadForm from "./DownloadForm";
+export default async function Sharelist() {
+  const token = await authorization();
+  console.log("role",token.role)
 
-export default function Download() {
+  if (token.role !== "admin") {
+    redirect("/");
+  }
+
+
   return (
     <div>
-      <h1>Download</h1>
-      <p>Download share </p>
-        
+      <DownloadForm token={token}/>
     </div>
-  )
+  );
 }
