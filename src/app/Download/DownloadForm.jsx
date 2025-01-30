@@ -23,7 +23,7 @@ export default function DownloadForm({ token }) {
       console.log("Data loaded successfully");
     } catch (error) {
       if (err.response?.status === 403 || err.response?.status === 401) {
-        redirect("/");
+        redirect("/Login");
       }
       console.error("Failed to load data:", error);
     }
