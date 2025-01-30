@@ -164,4 +164,8 @@ const ShareDataDisplay = ({ sharedata }) => {
   );
 };
 
+<<<<<<< HEAD
 export default ShareDataDisplay;
+=======
+export default ShareDataDisplay;
+>>>>>>> 7c441f488cebe54806636a76eeaf654eb9b47b8b

@@ -15,10 +15,11 @@ export default async function Sharelist({ searchParams }) {
   const search = searchparam?.search || "";
   const gainer = searchparam?.gainer || ""; // Optional gainer filter
   const page = parseInt(searchparam?.page || "1", 10);
+  const date = searchparam?.date || "";
 
   // Fetch data with page, search, and gainer parameters
   const { data } = await axios.get(
-    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}`,
+    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`,
     {
       headers: {
         Authorization: `Bearer ${token.access}`,
