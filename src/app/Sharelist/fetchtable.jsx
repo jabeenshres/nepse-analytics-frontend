@@ -34,16 +34,16 @@ export default function FetchTable({
   };
 
   // Handle Pagination (next/prev)
-  const handlePagination = (newPage) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    queryParams.set("page", newPage); // Set the new page number
+  // const handlePagination = (newPage) => {
+  //   const queryParams = new URLSearchParams(window.location.search);
+  //   queryParams.set("page", newPage); // Set the new page number
 
-    // Keep the gainer filter in the query string
-    if (gainer) queryParams.set("gainer", "1");
-    else queryParams.delete("gainer"); // Remove gainer if unchecked
+  //   // Keep the gainer filter in the query string
+  //   if (gainer) queryParams.set("gainer", "1");
+  //   else queryParams.delete("gainer"); // Remove gainer if unchecked
 
-    router.push(`?${queryParams.toString()}`);
-  };
+  //   router.push(`?${queryParams.toString()}`);
+  // };
 
   // Handle Checklist Toggle
   const handleChecklistToggle = (isChecked) => {

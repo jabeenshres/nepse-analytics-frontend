@@ -28,8 +28,8 @@ export default function Login() {
     
             const token = response.data;
             setCookies("token", JSON.stringify(token));
+            // console.log("Token:", token);
 
-            console.log("Token:", token);
             // Perform further actions, e.g., save the token, redirect, etc.
             router.push('/') // Redirect to the home page
         } catch (err) {
@@ -54,8 +54,6 @@ export default function Login() {
                   Sign in to your account
               </h1>
               <form class="space-y-4 md:space-y-6" onSubmit={handleLogin}>
-
-                
                   <div>
                       <label className="block mb-2 text-sm font-medium text-gray-900">User Name:</label>
                       <input type="text" name="username" id="username" className="bg-gray-100 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" required="" value={username} onChange={(e)=>setUsername(e.target.value)}/>
