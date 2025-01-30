@@ -14,26 +14,60 @@ const ShareDataDisplay = ({ sharedata }) => {
   const validatedata = sharedata.data;
   const initialvisible = 3;
   const [visibleCount, setVisibleCount] = useState(initialvisible);
-  const [ltsmpredicatedData, setltsmPredictedData] = useState([]);
-  const [rfpredicatedData, setrfPredictedData] = useState([]);
+  const [lineGraphData, setLineGraphData] = useState();
+
   const [loading, setLoading] = useState(false);
   console.log("sharedata", sharedata);
+ 
   useEffect(() => {
-    if (sharedata) {
-      const newData = sharedata.data.map((share) => ({
-        actual: share.close_price,
-        predicted: share.LTSM_predicted_close_price,
-      }));
-
-      const newrfData = sharedata.data.map((share) => ({
-        actual: share.close_price,
-        predicted: share.RF_predicted_close_price,
-      }));
-
-      setltsmPredictedData((prevData) => [...prevData, ...newData]);
-      setrfPredictedData((prevData) => [...prevData, ...newrfData]);
+    if (sharedata?.data?.length) {
+      const labels = [];
+      const actualData = [];
+      const ltsmPredictedData = [];
+      const rfPredictedData = [];
+  
+      // Loop through the data 
+      for (const share of sharedata.data) {
+        // Skip null entries and ensure valid data points
+        if (!share || share.close_price === null || share.LTSM_predicted_close_price === null) continue;
+  
+        // Add labels and data points
+        labels.unshift(share.date || "Unknown Date"); 
+        actualData.unshift(share.close_price);
+        ltsmPredictedData.unshift(share.LTSM_predicted_close_price ?? null);
+        rfPredictedData.unshift(share.RF_predicted_close_price ?? null);
+      }
+  
+      const formattedData = {
+        labels,
+        datasets: [
+          {
+            label: "Actual Data",
+            data: actualData,
+            borderColor: "green",
+            fill: false,
+          },
+          {
+            label: "LSTM Predictions",
+            data: ltsmPredictedData,
+            borderColor: "blue",
+            fill: false,
+          },
+          {
+            label: "RF Predictions",
+            data: rfPredictedData,
+            borderColor: "orange",
+            fill: false,
+          },
+        ],
+      };
+  
+      setLineGraphData(formattedData); // Assuming you have setLineGraphData state
     }
   }, [sharedata]);
+  
+   
+  console.log("data",lineGraphData)
 
   // Candle stick data for the chart
   const StockCandle = validatedata.map((item) => ({
@@ -130,9 +164,8 @@ const ShareDataDisplay = ({ sharedata }) => {
 
       {/* prediction block  */}
       <div className="mt-4 flex px-4 justify-center">
-        <ButtonWithLoader onClick={handlePredict} loading={loading} />
-        <LineGraph data={ltsmpredicatedData} />
-        <LineGraph data={rfpredicatedData} />
+    
+        <LineGraph data={lineGraphData} />
       </div>
       <div>
         <p>LSTM Mean Absolute Error: {sharedata.LTSM_Mean_Absolute_Error}</p>
