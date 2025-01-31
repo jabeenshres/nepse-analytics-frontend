@@ -197,7 +197,8 @@ const ShareDataDisplay = ({ sharedata }) => {
                 <th className="px-4 py-2">Metric</th>
                 <th className="px-4 py-2">LSTM</th>
                 <th className="px-4 py-2">Random Forest</th>
-                <th className="px-4 py-2">Overall</th>
+                <th className="px-4 py-2">Overall LSTM</th>
+                <th className="px-4 py-2">Overall RF</th>
               </tr>
             </thead>
             <tbody>
@@ -214,6 +215,9 @@ const ShareDataDisplay = ({ sharedata }) => {
                 <td className="px-4 py-2">
                   {sharedata.Overall_LTSM_Mean_Absolute_Error}
                 </td>
+                <td className="px-4 py-2">
+                  {sharedata.Overall_RF_Mean_Absolute_Error}
+                </td>
               </tr>
               <tr
                 className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
@@ -222,6 +226,7 @@ const ShareDataDisplay = ({ sharedata }) => {
                 <td className="px-4 py-2">{sharedata.LTSM_R_Square}</td>
                 <td className="px-4 py-2">{sharedata.RF_R_Square}</td>
                 <td className="px-4 py-2">{sharedata.Overall_LTSM_R_Square}</td>
+                <td className="px-4 py-2">{sharedata.Overall_RF_R_Square}</td>
               </tr>
               <tr
                 className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
@@ -233,6 +238,7 @@ const ShareDataDisplay = ({ sharedata }) => {
                 <td className="px-4 py-2">
                   {sharedata.data[0]?.RF_predicted_close_price}
                 </td>
+                <td className="px-4 py-2">N/A</td>
                 <td className="px-4 py-2">N/A</td>
               </tr>
             </tbody>
