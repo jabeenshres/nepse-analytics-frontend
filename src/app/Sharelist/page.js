@@ -8,7 +8,7 @@ import { authorization } from "../hoc/auth";
 import Pagination from "@/components/Pagination/pagination";
 
 export default async function Sharelist({ searchParams }) {
-  const token=await authorization();
+  
 
   // Extract query parameters
   const searchparam = await searchParams
@@ -19,12 +19,7 @@ export default async function Sharelist({ searchParams }) {
 
   // Fetch data with page, search, and gainer parameters
   const { data } = await axios.get(
-    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token.access}`,
-      },
-    }
+    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`
   );
 
   const { results, count } = data;
