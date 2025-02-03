@@ -8,6 +8,9 @@ export const stock_predict_endpoint = "predict/";
 
 export const login = "api/accounts/token/";
 
+
+export const register_endpoint = "api/accounts/register/";
+
 export const refresh_token = "api/token/refresh/";
 
 
@@ -15,6 +18,7 @@ export const users_endpoint = "api/accounts/users/";
 
 
 export const load_stock_data_endpoint = "api/admin/load_stock_data/";
+export const predict_stock_data_endpoint = "api/admin/predict/";
 
 // export const url_filter = "api/admin/recent/?search=s&gainer=1/"; YO params sanga pass garna milxa paxi heroola
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import CandlestickChart from "@/components/CandleStick/candlestick";
-import LineGraph from "@/components/LineChart/LineChart";
+import LineGraph from "@/components/LineGraph/LIneGraph";
 
 const ShareDataDisplay = ({ sharedata }) => {
   // console.log("Sharedata:", sharedata);

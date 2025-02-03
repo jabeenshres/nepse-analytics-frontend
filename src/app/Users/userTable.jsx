@@ -26,15 +26,15 @@ export default function UserTable({ datas }) {
           </thead>
           <tbody>
             {datas.map((user) => (
-              <tr key={user.id} className={``}>
-                <td className={``}>{user.id}</td>
-                <td className="px-4 py-2 border border-gray-300">
+              <tr key={user.id} className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}>
+                <td className={`px-4 py-2`}>{user.id}</td>
+                <td className="px-4 py-2 ">
                   {user.username}
                 </td>
-                <td className="px-4 py-2 border border-gray-300">
+                <td className="px-4 py-2">
                   {user.email}
                 </td>
-                <td className="px-4 py-2 border border-gray-300">
+                <td className="px-4 py-2">
                  <RoleCheckBox id={user.id} role={user.role}/>
                 </td>
               </tr>
