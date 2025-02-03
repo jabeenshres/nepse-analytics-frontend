@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { authorization } from "../hoc/auth";
+
 
 async function About() {
     const commonInputClasses = "w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out";
@@ -23,23 +23,9 @@ async function About() {
                        </div>
                    </div>
                </div>
-               <div className="lg:w-1/3 md:w-1/2 bg-white flex flex-col md:ml-auto w-full md:py-8 mt-8 md:mt-0">
-                   <h2 className="text-gray-900 text-lg mb-1 font-medium title-font">Feedback</h2>
-                   <p className="leading-relaxed mb-5 text-gray-600">If you have any questions or need any information, feel free to ask below:</p>
-                   <div className="relative mb-4">
-                       <label htmlFor="name" className="leading-7 text-sm text-gray-600">Name</label>
-                       <input type="text" id="name" name="name" className={commonInputClasses} />
-                   </div>
-                   <div className="relative mb-4">
-                       <label htmlFor="email" className="leading-7 text-sm text-gray-600">Email</label>
-                       <input type="email" id="email" name="email" className={commonInputClasses} />
-                   </div>
-                   <div className="relative mb-4">
-                       <label htmlFor="message" className="leading-7 text-sm text-gray-600">Message</label>
-                       <textarea id="message" name="message" className={`${commonInputClasses} h-32 resize-none`}></textarea>
-                   </div>
-                   <button className="text-white bg-gray-600 border-0 py-2 px-6 focus:outline-none hover:bg-gray-500 rounded text-lg">Submit</button>
-                   <p className="text-xs text-gray-500 mt-3">Thank you for believing in us..........</p>
+               <div className="lg:w-1/3 md:w-1/2 bg-white italic flex flex-col md:ml-auto w-full md:py-8 mt-8 md:mt-0">
+                  <p>The share market is a platform where investors buy and sell shares of publicly traded companies. It operates through stock exchanges, such as the NSE and BSE, allowing companies to raise capital and investors to earn returns. Market trends are influenced by factors like economic conditions, corporate performance, and global events. Trading can be done in two primary ways: intraday trading (buying and selling within the same day) and long-term investment (holding stocks for future growth). Successful investing requires research, analysis, and risk management.</p>
+                  <p>The stock market is a dynamic financial ecosystem where investors trade shares of publicly listed companies. It serves as a vital engine for economic growth, enabling businesses to raise capital while offering individuals opportunities to build wealth. Market movements are driven by corporate performance, economic indicators, and global trends. Investors engage in intraday trading for quick gains or adopt long-term investment strategies for sustained growth. Mastering the stock market requires sharp analysis, risk management, and strategic decision-making, making it a powerful tool for financial success.</p>
                </div>
            </div>
        </section>

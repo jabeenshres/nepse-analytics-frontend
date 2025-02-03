@@ -1,5 +1,15 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
 function Navbar() {
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const loginType = localStorage.getItem("loginType");
+        setIsAdmin(loginType === "admin");
+      }, []);
+
     return (
         <div>
             <aside id="logo-sidebar"
@@ -64,7 +74,9 @@ function Navbar() {
                                 <span className="flex-1 ms-3 whitespace-nowrap">About Us </span>
                             </Link>
                         </li>
-                        <li>
+                        {/* {
+                            isAdmin && <> */}
+                            <li>
                             <Link href="../Download"
                                 className="flex items-center p-2  rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group">
                                 <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -83,6 +95,9 @@ function Navbar() {
                                 <span className="flex-1 ms-3 whitespace-nowrap">Users</span>
                             </Link>
                         </li>
+                            {/* </>
+                        } */}
+                        
                         <li>
                             <Link href="../Login"
                                 className="flex items-center p-2  rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group">
