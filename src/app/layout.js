@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "@/components/Navbar/navbar";
+import Sidebar from "@/components/Navbar/sidebar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -10,6 +10,18 @@ const geistSans = localFont({
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
+  weight: "100 900",
+});
+
+const robertoitalic = localFont({
+  src: "./fonts/Robertoitalic.ttf",
+  variable: "--font-roboto-italic",
+  weight: "100 900",
+});
+
+const robertV = localFont({
+  src: "./fonts/Roberto.ttf",
+  variable: "--font-roboto-variable",
   weight: "100 900",
 });
 
@@ -25,8 +37,8 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}>
-          <Navbar/>
+        className={`${geistSans.variable} ${geistMono.variable} ${robertV.variable} ${robertoitalic.variable} antialiased bg-background text-foreground`}>
+          <Sidebar/>
        <DataWrapper data={data}>
         <div className="p-4 sm:ml-64"> 
         {children}

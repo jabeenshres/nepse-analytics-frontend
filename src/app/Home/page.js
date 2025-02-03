@@ -29,8 +29,7 @@ export default async function Homee() {
   }
   return (
     <div>
-      <p>Welcome {username}</p>
-      <Homedesign gainer={gainer.data} looser={looser.data} />
+      <Homedesign username={username} gainer={gainer.data} looser={looser.data} />
     </div>
   );
 }

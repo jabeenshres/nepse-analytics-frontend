@@ -34,8 +34,8 @@ export default function RoleCheckBox({ role, id }) {
   }
 
   return (
-    <div>
-      <label htmlFor="role">
+    <div >
+      <label htmlFor="role" className="flex gap-3">
         <input
           type="checkbox"
           name="role"

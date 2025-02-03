@@ -2,13 +2,11 @@ import React from "react";
 import FetchTable from "./fetchtable";
 import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
-import { getCookies } from "@/app/utils/setCookies";
 import { stock_recent_endpoint } from "../config/endpoint";
-import { authorization } from "../hoc/auth";
 import Pagination from "@/components/Pagination/pagination";
 
 export default async function Sharelist({ searchParams }) {
-  
+  // const token=await authorization();
 
   // Extract query parameters
   const searchparam = await searchParams
@@ -19,7 +17,7 @@ export default async function Sharelist({ searchParams }) {
 
   // Fetch data with page, search, and gainer parameters
   const { data } = await axios.get(
-    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`
+    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`,
   );
 
   const { results, count } = data;

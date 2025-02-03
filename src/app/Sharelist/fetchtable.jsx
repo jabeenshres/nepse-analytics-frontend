@@ -29,7 +29,6 @@ export default function FetchTable({
   // Handle Gainer Toggle
   const handleGainerToggle = (isChecked) => {
     const queryParams = new URLSearchParams(window.location.search);
-    
     queryParams.set("gainer", isChecked ? "1" : "0");
     queryParams.delete("page"); // Reset pagination
     router.push(`?${queryParams.toString()}`);
@@ -64,7 +63,7 @@ export default function FetchTable({
   };
 
   return (
-    <div className="container mx-auto p-4 rounded-lg">
+    <div className="container mx-auto p-4 rounded-lg font-family-roboto">
       {/* Search and Gainer Controls */}
       <div className="flex justify-between items-center mb-4 w-full bg-gray-100 h-16 text-2xl rounded-lg shadow-xl">
         <h1 className="text-2xl font-bold ml-10">Stock Price List</h1>
@@ -154,16 +153,16 @@ export default function FetchTable({
             {datas.map((stock) => (
               <tr
                 key={stock.id}
-                className={`font-mono text-white ${stock.data[0].close_price > stock.data[0].open_price ? "bg-green-600" : "bg-red-600"} cursor-pointer`}
+                className={`font-mono  text-white ${stock.data[0].close_price > stock.data[0].open_price ? "bg-green-600" : "bg-red-600"} cursor-pointer`}
                 onClick={() => router.push(`/Sharelist/${stock.id}`)}
               >
                 <td className="px-4 py-2 border border-gray-300">{stock.symbol}</td>
                 <td className="px-4 py-2 border border-gray-300">{stock.security_name}</td>
-                <td className="px-4 py-2 border border-gray-300">{stock.data[0].open_price}</td>
-                <td className="px-4 py-2 border border-gray-300">{stock.data[0].high_price}</td>
-                <td className="px-4 py-2 border border-gray-300">{stock.data[0].low_price}</td>
-                <td className="px-4 py-2 border border-gray-300">{stock.data[0].close_price}</td>
-                <td className="px-4 py-2 border border-gray-300">{stock.data[0].last_updated_price}</td>
+                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].open_price}</td>
+                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].high_price}</td>
+                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].low_price}</td>
+                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].close_price}</td>
+                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].last_updated_price}</td>
               </tr>
             ))}
           </tbody>

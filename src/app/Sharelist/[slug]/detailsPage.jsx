@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import CandlestickChart from "@/components/CandleStick/candlestick";
-import ButtonWithLoader from "@/components/ButtonLoader/ButtonWithLoader";
-import { fetchPrediction } from "@/app/Sharelist/fetchPrediction";
 import LineGraph from "@/components/LineGraph/LIneGraph";
 
 const ShareDataDisplay = ({ sharedata }) => {
@@ -16,7 +14,7 @@ const ShareDataDisplay = ({ sharedata }) => {
   const [visibleCount, setVisibleCount] = useState(initialvisible);
   const [lineGraphData, setLineGraphData] = useState();
 
-  const [tab, setTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("candlestick");
 
   useEffect(() => {
     if (sharedata?.data?.length) {
@@ -108,12 +106,24 @@ const ShareDataDisplay = ({ sharedata }) => {
           </button>
         </div>
       {/* block options  */}
-      <div className="flex gap-4">
-        <button onClick={()=>setTab("general")} className={`${tab=="general"?'bg-blue-700':'bg-slate-200'} rounded-full hover:bg-blue-500 text-white font-bold py-2 px-4 rounded `}>general</button>
-        <button onClick={()=>setTab("prediction")} className={`${tab=="prediction"?'bg-blue-700':'bg-slate-200'} rounded-full hover:bg-blue-500 text-white font-bold py-2 px-4 rounded `}>prediciton</button>
+      
+      {/* Stock Details Tab */}
+      <div className="container mx-auto my-4 p-4">
+        <div className="flex border-b">
+          <button
+            className={`px-4 py-2 ${activeTab === "candlestick" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+            onClick={() => setActiveTab("candlestick")}>
+            Candlestick Chart
+          </button>
+          <button
+            className={`px-4 py-2 ${activeTab === "prediction" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
+            onClick={() => setActiveTab("prediction")}>
+            Prediction Graph
+          </button>
+        </div>
       </div>
       {/* general block  */}
-      {tab=="general" && <div>
+      {activeTab=="candlestick" && <div>
 
         {/* Stock Trading Data */}
         <h2 className="text-2xl font-bold mb-4">Stock Trading Data</h2>
@@ -159,7 +169,7 @@ const ShareDataDisplay = ({ sharedata }) => {
                 className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-lg hover:bg-blue-700 transition"
                 onClick={() => setVisibleCount(visibleCount + 5)}
               >
-                {" "}
+            
                 {/* Increase visible count by 5 */}
                 See More
               </button>
@@ -171,7 +181,7 @@ const ShareDataDisplay = ({ sharedata }) => {
                 className="px-4 py-2 bg-red-600 text-white rounded-md shadow-lg hover:bg-red-700 transition"
                 onClick={() => setVisibleCount(initialvisible)}
               >
-                {" "}
+                
                 {/* Reset visible count to initial value */}
                 See Less
               </button>
@@ -186,7 +196,7 @@ const ShareDataDisplay = ({ sharedata }) => {
       </div>}
 
       {/* prediction block  */}
-      {tab=="prediction"&&<div>
+      {activeTab =="prediction"&&<div>
         <div className="mt-4 flex px-4 justify-center">
           <LineGraph data={lineGraphData} />
         </div>
