@@ -9,7 +9,7 @@ export default async function Sharelist({ searchParams }) {
   // const token=await authorization();
 
   // Extract query parameters
-  const searchparam = await searchParams
+  const searchparam = await searchParams;
   const search = searchparam?.search || "";
   const gainer = searchparam?.gainer || ""; // Optional gainer filter
   const page = parseInt(searchparam?.page || "1", 10);
@@ -17,7 +17,7 @@ export default async function Sharelist({ searchParams }) {
 
   // Fetch data with page, search, and gainer parameters
   const { data } = await axios.get(
-    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`,
+    `${BASE_URL}${stock_recent_endpoint}?page=${page}&search=${search}&gainer=${gainer}&date=${date}`
   );
 
   const { results, count } = data;
@@ -26,7 +26,9 @@ export default async function Sharelist({ searchParams }) {
   return (
     <div>
       <FetchTable datas={results} searchTerm={search} gainer={gainer} />
-      <Pagination currentPage={page} totalPages={totalPages} />
+      <div className="flex justify-center">
+        <Pagination currentPage={page} totalPages={totalPages} />
+      </div>
     </div>
   );
 }
