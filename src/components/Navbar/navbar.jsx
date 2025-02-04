@@ -7,9 +7,9 @@ function Navbar({ role }) {
   const router = useRouter();
   
   console.log("navbar", role);
-  const handleLogout = () => {
+  const handleLogout = async() => {
     // Remove token from cookies
-    removeCookies("token")
+    await removeCookies("token")
 
     // Redirect to login page
     router.push("/Login");
@@ -152,7 +152,7 @@ function Navbar({ role }) {
               </li>
             )}
 
-            <li>
+           {role==="not-login"&& <li>
               <Link
                 href="../Login"
                 className="flex items-center p-2  rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group"
@@ -168,9 +168,9 @@ function Navbar({ role }) {
                 </svg>
                 <span className="flex-1 ms-3 whitespace-nowrap">Sign In</span>
               </Link>
-            </li>
+            </li>}
             <li>
-              <button onClick={() => handleLogout()}  className="flex items-center p-2 rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group w-full absolute bottom-5 left-0">Logout</button>
+              {role!=="not-login"&&<button onClick={() => handleLogout()}  className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700  group w-full absolute bottom-5 left-0">Logout</button>}
             </li>
           </ul>
         </div>

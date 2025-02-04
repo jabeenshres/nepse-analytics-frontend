@@ -1,5 +1,5 @@
 import RoleCheckBox from "@/components/RoleCheckBox/roleCheckBox";
-export default function UserTable({ datas }) {
+export default function UserTable({ datas,username }) {
   return (
     <div className="container mx-auto p-4 rounded-lg">
       {/* Search and Gainer Controls */}
@@ -26,7 +26,7 @@ export default function UserTable({ datas }) {
           </thead>
           <tbody>
             {datas.map((user) => (
-              <tr key={user.id} className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}>
+              <tr key={user.id} className={`border-b font-mono text-black cursor-pointer ${username===user.username?"bg-gray-500":"bg-gray-300"}`}>
                 <td className={`px-4 py-2`}>{user.id}</td>
                 <td className="px-4 py-2 ">
                   {user.username}

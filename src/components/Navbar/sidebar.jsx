@@ -6,23 +6,16 @@ import Navbar from "./navbar";
 export default async function Sidebar() {
   const cookieStore = await cookies();
 
-  let role = "user";
+  let role = "not-login";
   try {
     const token = JSON.parse(cookieStore.get("token")?.value);
 
     if (token) {
-      role = token?.role ?? "user";
+      role = token?.role ?? "not-login";
     }
   } catch (error) {
-    role = "user";
+    role = "not-login";
   }
-  const handleLogout = () => {
-    // Remove token from cookies
-    cookieStore.delete("token");
-
-    // Redirect to login page
-    router.push("/Login");
-  };
-
+  
   return <Navbar role={role} />;
 }
