@@ -26,7 +26,7 @@ export default function Login() {
               password,
             });
             const token = response.data;
-            setCookies("token", JSON.stringify(token));
+            await setCookies("token", JSON.stringify(token));
             // console.log("Token:", token);
 
             // Perform further actions, e.g., save the token, redirect, etc.
