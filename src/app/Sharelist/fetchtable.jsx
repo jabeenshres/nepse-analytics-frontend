@@ -89,7 +89,8 @@ export default function FetchTable({
 
             {/* Gainer Toggle */}
             <div className="flex items-center space-x-2">
-              <span className="text-sm">Gainer:</span>
+              {gainer?<span className="text-sm">Gainer:</span>:
+              <span className="text-sm">Looser:</span>}
               <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
