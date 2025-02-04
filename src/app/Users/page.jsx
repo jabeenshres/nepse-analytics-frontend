@@ -34,7 +34,7 @@ export default async function Sharelist() {
 
   return (
     <div>
-      <UserTable datas={data} />
+      <UserTable datas={data} username={token.username}/>
     </div>
   );
 }
