@@ -1,8 +1,7 @@
 import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
-import { Auth_URL } from "@/app/config/constraints";
 import { getCookies, setCookies } from "@/app/utils/setCookies";
-import {jwtDecode} from "jwt-decode";
+// import {jwtDecode} from "jwt-decode";
 
 // let refreshingToken = false; // Flag to prevent multiple token refreshes
 

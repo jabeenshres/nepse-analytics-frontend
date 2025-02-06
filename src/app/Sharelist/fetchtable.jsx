@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BiSearchAlt } from "react-icons/bi";
+import { toast } from "react-toastify";
 
 export default function FetchTable({
   datas,
@@ -15,51 +16,76 @@ export default function FetchTable({
   const [selectedDate, setSelectedDate] = useState(initialDate || "");
   const router = useRouter();
 
+  toast.configure();
   // Handle Search Button Click
   const handleSearch = () => {
-    const queryParams = new URLSearchParams(window.location.search);
-    
-    if (searchTerm) queryParams.set("search", searchTerm);
-    else queryParams.delete("search");
-
-    queryParams.delete("page"); // Reset pagination
-    router.push(`?${queryParams.toString()}`);
+    try {
+      const queryParams = new URLSearchParams(window.location.search);
+      
+      if (searchTerm) queryParams.set("search", searchTerm);
+      else queryParams.delete("search");
+  
+      queryParams.delete("page"); // Reset pagination
+      router.push(`?${queryParams.toString()}`);
+      setError(null); // Clear any previous errors
+    } catch (error) {
+      console.error("Error in handleSearch:", error);
+      toast.error("Failed to update search parameters!", { position: "top-right" });
+    }
   };
 
   // Handle Gainer Toggle
   const handleGainerToggle = (isChecked) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    queryParams.set("gainer", isChecked ? "1" : "0");
-    queryParams.delete("page"); // Reset pagination
-    router.push(`?${queryParams.toString()}`);
+    try {
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set("gainer", isChecked ? "1" : "0");
+      queryParams.delete("page"); // Reset pagination
+      router.push(`?${queryParams.toString()}`);
+      setError(null);
+    } catch (error) {
+      console.error("Error in handleGainerToggle:", error);
+      toast.error("Something went wrong while toggling gainer!", { position: "top-right" });
+    }
   };
 
   // Handle Checklist Toggle
   const handleChecklistToggle = (isChecked) => {
-    setIsChecklistChecked(isChecked);
-    const queryParams = new URLSearchParams(window.location.search);
-
-    if (!isChecked) {
-      queryParams.delete("gainer");
-      setGainer(false);
+    try {
+      setIsChecklistChecked(isChecked);
+      const queryParams = new URLSearchParams(window.location.search);
+  
+      if (!isChecked) {
+        queryParams.delete("gainer");
+        setGainer(false);
+      }
+  
+      queryParams.delete("page"); // Reset pagination
+      router.push(`?${queryParams.toString()}`);
+      setError(null);
+    } catch (error) {
+      console.error("Error in handleChecklistToggle:", error);
+      toast.error("Failed to update checklist!", { position: "top-right" });
     }
-
-    queryParams.delete("page"); // Reset pagination
-    router.push(`?${queryParams.toString()}`);
   };
 
   // Handle Date Change
   const handleDateChange = (event) => {
-    const newDate = event.target.value;
-    setSelectedDate(newDate);
-
-    const queryParams = new URLSearchParams(window.location.search);
-
-    if (newDate) queryParams.set("date", newDate);
-    else queryParams.delete("date");
-
-    queryParams.delete("page"); // Reset pagination
-    router.push(`?${queryParams.toString()}`);
+    try {
+      const newDate = event.target.value;
+      setSelectedDate(newDate);
+  
+      const queryParams = new URLSearchParams(window.location.search);
+  
+      if (newDate) queryParams.set("date", newDate);
+      else queryParams.delete("date");
+  
+      queryParams.delete("page"); // Reset pagination
+      router.push(`?${queryParams.toString()}`);
+      setError(null);
+    } catch (error) {
+      console.error("Error in handleDateChange:", error);
+      toast.error("Failed to update date selection!", { position: "top-right" });
+    }
   };
 
   return (

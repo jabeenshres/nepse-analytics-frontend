@@ -1,8 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Pagination({ totalPages, currentPage }) {
   const router = useRouter();
+  toast.configure();
 
   const current = currentPage;
 
@@ -26,10 +29,16 @@ export default function Pagination({ totalPages, currentPage }) {
 
   //   function that set the value of the page
   const handleClick = (value) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    queryParams.set("page", value);
-    router.push(`?${queryParams.toString()}`);
+    try {
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set("page", value);
+      router.push(`?${queryParams.toString()}`);
+    } catch (error) {
+      console.error("Error in handleClick:", error);
+      toast.error("Failed to change page!", { position: "top-right" });
+    }
   };
+  
 
   //   pushing value into frontpage array while i is less than the given marginPage value
   //   and while i is less than the total page value (to avoid filling front page when marginpage is greater than the total )

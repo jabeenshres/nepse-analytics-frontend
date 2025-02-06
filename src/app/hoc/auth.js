@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 export const authorization = async () => {
   // Get token from cookie
   const cookieStore = await cookies();
-
   const Token = cookieStore.get("token");
   console.log("hasToken",Token)
 
@@ -13,6 +12,4 @@ export const authorization = async () => {
     redirect("/Login");
   }
   return JSON.parse(Token?.value);
-
-   
 };

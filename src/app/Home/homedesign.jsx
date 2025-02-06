@@ -2,29 +2,47 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import React from "react";
+import { toast } from "react-toastify";
 
 function Homedesign({ username, gainer, looser }) {
+
+  toast.configure();
   const handleRowClick = (id) => {
-    redirect(`/Sharelist/${id}`);
+    try {
+      redirect(`/Sharelist/${id}`);
+    } catch (err) {
+      console.error("Error in handleRowClick:", err);
+      toast.error("Failed to open stock details!", { position: "top-right" });
+    }
   };
   const handlegainer = () => {
-    redirect(`/Sharelist?gainer=1`);
+    try {
+      redirect(`/Sharelist?gainer=1`);
+    } catch (error) {
+      console.error("Error in handlegainer:", error);
+      toast.error("Failed to filter top gainers!", { position: "top-right" });
+    }
   };
   const handlelooser = () => {
-    redirect(`/Sharelist?gainer=0`);
+    try {
+      redirect(`/Sharelist?gainer=0`);
+    } catch (error) {
+      console.error("Error in handlelooser:", error);
+      toast.error("Failed to filter top losers!", { position: "top-right" });
+    }
   };
 
   return (
     <div>
-      <marquee behavior="scroll" direction="left" scrollamount="5">
-        {username!=="Guest"?`Welcome ${username} to SHARE NEPAL !`:"Welcome to SHARE NEPAL !"}
+      <marquee behavior="scroll" direction="left" scrollamount="5" className="text-gray-700 text-lg p-2">
+        {username !== "Guest" ? `Welcome ${username} to SHARE NEPAL !` : "Welcome to SHARE NEPAL !"}
       </marquee>
 
-      <section className="bg-white dark:bg-gray-900">
+      <section className="bg-gray-900">
         <div className="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 z-10 relative">
           <Link
             href="./Sharelist"
-            className="inline-flex justify-between items-center py-1 px-1 pe-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800"
+            className="inline-flex justify-between items-center py-1 px-1 pe-4 mb-7 text-sm  rounded-full bg-blue-900 text-blue-300  hover:bg-blue-800"
           >
             <span className="text-xs bg-blue-600 rounded-full text-white px-4 py-1.5 me-3">
               New
@@ -46,10 +64,10 @@ function Homedesign({ username, gainer, looser }) {
               />
             </svg>
           </Link>
-          <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+          <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl lg:text-6xl text-white">
             We invest in the world’s potential
           </h1>
-          <p className="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-200">
+          <p className="mb-8 text-lg font-normal lg:text-xl sm:px-16 lg:px-48 text-gray-200">
             Invest Today, Prosper Tomorrow
           </p>
           <button className="relative px-6 py-3 font-bold text-lg text-[#06c8d9] uppercase tracking-wider border-4 border-[#06c8d9] transition-all duration-700 overflow-hidden">
@@ -83,7 +101,7 @@ function Homedesign({ username, gainer, looser }) {
             </defs>
           </svg>
         </div>
-        <div className="bg-gradient-to-b from-blue-50 to-transparent dark:from-blue-900 w-full h-full absolute top-0 left-0 z-[-1]"></div>
+        {/* <div className="bg-gradient-to-b to-transparent from-blue-900 w-full h-full absolute top-0 left-0 z-[-1]"></div> */}
       </section>
 
       <div className="flex flex-row justify-center space-x-60 p-10">
@@ -109,8 +127,8 @@ function Homedesign({ username, gainer, looser }) {
                 const percentageChange =
                   currentClosePrice && previousClosePrice
                     ? ((currentClosePrice - previousClosePrice) /
-                        previousClosePrice) *
-                      100
+                      previousClosePrice) *
+                    100
                     : null;
 
                 return (
@@ -164,8 +182,8 @@ function Homedesign({ username, gainer, looser }) {
                 const percentageChange =
                   currentClosePrice && previousClosePrice
                     ? ((currentClosePrice - previousClosePrice) /
-                        previousClosePrice) *
-                      100
+                      previousClosePrice) *
+                    100
                     : null;
 
                 return (
