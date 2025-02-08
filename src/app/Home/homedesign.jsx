@@ -2,17 +2,17 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import React from "react";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 function Homedesign({ username, gainer, looser }) {
 
-  toast.configure();
+  // toast.configure();
   const handleRowClick = (id) => {
     try {
       redirect(`/Sharelist/${id}`);
     } catch (err) {
       console.error("Error in handleRowClick:", err);
-      toast.error("Failed to open stock details!", { position: "top-right" });
+      // toast.error("Failed to open stock details!", { position: "top-right" });
     }
   };
   const handlegainer = () => {
@@ -20,7 +20,7 @@ function Homedesign({ username, gainer, looser }) {
       redirect(`/Sharelist?gainer=1`);
     } catch (error) {
       console.error("Error in handlegainer:", error);
-      toast.error("Failed to filter top gainers!", { position: "top-right" });
+      // toast.error("Failed to filter top gainers!", { position: "top-right" });
     }
   };
   const handlelooser = () => {
@@ -28,13 +28,13 @@ function Homedesign({ username, gainer, looser }) {
       redirect(`/Sharelist?gainer=0`);
     } catch (error) {
       console.error("Error in handlelooser:", error);
-      toast.error("Failed to filter top losers!", { position: "top-right" });
+      // toast.error("Failed to filter top losers!", { position: "top-right" });
     }
   };
 
   return (
     <div>
-      <marquee behavior="scroll" direction="left" scrollamount="5" className="text-gray-700 text-lg p-2">
+      <marquee behavior="scroll" direction="left" scrollamount="5" className="text-white text-lg p-2">
         {username !== "Guest" ? `Welcome ${username} to SHARE NEPAL !` : "Welcome to SHARE NEPAL !"}
       </marquee>
 
@@ -101,7 +101,7 @@ function Homedesign({ username, gainer, looser }) {
             </defs>
           </svg>
         </div>
-        {/* <div className="bg-gradient-to-b to-transparent from-blue-900 w-full h-full absolute top-0 left-0 z-[-1]"></div> */}
+        <div className="bg-gradient-to-b to-transparent from-blue-900 w-full h-full absolute top-0 left-0 z-[-1]"></div>
       </section>
 
       <div className="flex flex-row justify-center space-x-60 p-10">

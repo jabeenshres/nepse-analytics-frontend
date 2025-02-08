@@ -2,37 +2,45 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { removeCookies } from "@/app/utils/setCookies";
+import { useState } from "react";
 
 function Navbar({ role }) {
     const router = useRouter();
+    const [isOpen, setIsOpen] = useState(false);
 
     console.log("navbar", role);
     const handleLogout = async () => {
         try {
-          await removeCookies("token");
-          toast.success("Logged out successfully!", { position: "top-right" });
-      
-          // Redirect after a short delay for a smooth user experience
-          setTimeout(() => {
-            router.push("/Login");
-          }, 1000);
+            await removeCookies("token");
+            // toast.success("Logged out successfully!", { position: "top-right" });
+
+            // Redirect after a short delay for a smooth user experience
+            setTimeout(() => {
+                router.push("/Login");
+            }, 1000);
         } catch (error) {
-          console.error("Error during logout:", error);
-          toast.error("Logout failed! Please try again.", { position: "top-right" });
+            console.error("Error during logout:", error);
+            // toast.error("Logout failed! Please try again.", { position: "top-right" });
         }
-      };
-    
+    };
+
 
     return (
         <div>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="md:hidden fixed top-4 left-4 z-50 bg-gray-900 p-2 rounded-md text-white"
+            >    ☰
+            </button>
             <aside
                 id="logo-sidebar"
-                className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full  sm:translate-x-0 bg-gray-900 border-gray-900"
+                className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform ${isOpen ? "translate-x-0" : "-translate-x-full"
+                    } sm:translate-x-0 bg-gray-900 border-gray-900`}
                 aria-label="Sidebar"
             >
                 <nav className="fixed top-0 z-50 w-full bg-gray-900 border-gray-900">
                     <div className="px-3 py-3 lg:px-5 lg:pl-3">
-                        <div className="flex items-center justify-start rtl:justify-end">
+                        <div className="flex items-center justify-between">
                             <Link href="../" className="flex ms-2 md:me-24">
                                 <img
                                     src="/images/sharelogom.png"
@@ -43,6 +51,9 @@ function Navbar({ role }) {
                                     SHARE NEPAL
                                 </span>
                             </Link>
+                            <button onClick={() => setIsOpen(false)} className="md:hidden text-white text-xl">
+                                ✕
+                            </button>
                         </div>
                     </div>
                 </nav>
@@ -51,10 +62,10 @@ function Navbar({ role }) {
                         <li>
                             <Link
                                 href="../"
-                                className="flex items-center p-2 rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group"
+                                className="flex items-center p-2 rounded-lg text-white  hover:bg-gray-700 group"
                             >
                                 <svg
-                                    className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 text-gray-500 group-hover:text-gray-900 group-hover:text-white"
+                                    className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400  group-hover:text-white"
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="currentColor"
@@ -68,10 +79,10 @@ function Navbar({ role }) {
                         <li>
                             <Link
                                 href="../Sharelist"
-                                className="flex items-center p-2 rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group"
+                                className="flex items-center p-2 rounded-lg text-white  hover:bg-gray-700 group"
                             >
                                 <svg
-                                    className="w-5 h-5 text-gray-500 transition duration-75 text-gray-500 group-hover:text-gray-900 group-hover:text-white"
+                                    className="w-5 h-5  transition duration-75 text-gray-400  group-hover:text-white"
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="currentColor"
@@ -87,10 +98,10 @@ function Navbar({ role }) {
                         <li>
                             <Link
                                 href="../About"
-                                className="flex items-center p-2  rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group"
+                                className="flex items-center p-2  rounded-lg text-white  hover:bg-gray-700 group"
                             >
                                 <svg
-                                    className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 text-gray-500  group-hover:text-white"
+                                    className="flex-shrink-0 w-5 h-5  transition duration-75 text-gray-400  group-hover:text-white"
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="currentColor"
@@ -108,7 +119,7 @@ function Navbar({ role }) {
                             <li>
                                 <Link
                                     href="../Download"
-                                    className="flex items-center p-2  rounded-lg text-white hover:bg-gray-100 hover:bg-gray-700 group"
+                                    className="flex items-center p-2  rounded-lg text-white hover:bg-gray-700 group"
                                 >
                                     <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400  group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                         <path fillRule="evenodd" d="M13 11.15V4a1 1 0 1 0-2 0v7.15L8.78 8.374a1 1 0 1 0-1.56 1.25l4 5a1 1 0 0 0 1.56 0l4-5a1 1 0 1 0-1.56-1.25L13 11.15Z" clipRule="evenodd" />
@@ -121,8 +132,8 @@ function Navbar({ role }) {
 
                         {role == "admin" && (
                             <li>
-                                <Link href="../Users" className="flex items-center p-2  rounded-lg dark:text-white hover:bg-gray-700 group">
-                                    <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                                <Link href="../Users" className="flex items-center p-2  rounded-lg text-white hover:bg-gray-700 group">
+                                    <svg className="shrink-0 w-5 h-5  transition duration-75 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                                         <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
                                     </svg>
                                     <span className="flex-1 ms-3 whitespace-nowrap">Users</span>
@@ -137,7 +148,7 @@ function Navbar({ role }) {
                                     className="flex items-center p-2  rounded-lg text-white  hover:bg-gray-700 group"
                                 >
                                     <svg
-                                        className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                                        className="shrink-0 w-5 h-5  transition duration-75 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                                         aria-hidden="true"
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="currentColor"

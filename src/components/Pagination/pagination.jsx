@@ -1,11 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
 export default function Pagination({ totalPages, currentPage }) {
   const router = useRouter();
-  toast.configure();
+  // toast.configure();
 
   const current = currentPage;
 
@@ -35,7 +35,7 @@ export default function Pagination({ totalPages, currentPage }) {
       router.push(`?${queryParams.toString()}`);
     } catch (error) {
       console.error("Error in handleClick:", error);
-      toast.error("Failed to change page!", { position: "top-right" });
+      // toast.error("Failed to change page!", { position: "top-right" });
     }
   };
   

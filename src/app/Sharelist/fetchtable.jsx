@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BiSearchAlt } from "react-icons/bi";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 export default function FetchTable({
   datas,
@@ -16,7 +16,7 @@ export default function FetchTable({
   const [selectedDate, setSelectedDate] = useState(initialDate || "");
   const router = useRouter();
 
-  toast.configure();
+  // toast.configure();
   // Handle Search Button Click
   const handleSearch = () => {
     try {
@@ -30,7 +30,7 @@ export default function FetchTable({
       setError(null); // Clear any previous errors
     } catch (error) {
       console.error("Error in handleSearch:", error);
-      toast.error("Failed to update search parameters!", { position: "top-right" });
+      // toast.error("Failed to update search parameters!", { position: "top-right" });
     }
   };
 
@@ -44,7 +44,7 @@ export default function FetchTable({
       setError(null);
     } catch (error) {
       console.error("Error in handleGainerToggle:", error);
-      toast.error("Something went wrong while toggling gainer!", { position: "top-right" });
+      // toast.error("Something went wrong while toggling gainer!", { position: "top-right" });
     }
   };
 

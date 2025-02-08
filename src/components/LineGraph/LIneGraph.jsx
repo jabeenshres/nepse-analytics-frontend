@@ -34,7 +34,7 @@ const LineGraph = ({ data }) => {
       {
         label: "Actual Data",
         data: data.datasets.find((ds) => ds.label === "Actual Data").data,
-        borderColor: "green",
+        borderColor: "red",
         fill: false,
         hidden: !visibleLines.actualData, // Hide line based on state
       },
@@ -48,7 +48,7 @@ const LineGraph = ({ data }) => {
       {
         label: "RF Predictions",
         data: data.datasets.find((ds) => ds.label === "RF Predictions").data,
-        borderColor: "orange",
+        borderColor: "green",
         fill: false,
         hidden: !visibleLines.rfPredictions, // Hide line based on state
       },
