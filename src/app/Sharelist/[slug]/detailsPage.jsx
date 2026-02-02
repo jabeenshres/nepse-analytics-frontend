@@ -1,260 +1,435 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import { FiArrowLeft, FiTrendingUp, FiTrendingDown, FiActivity, FiTarget, FiBarChart2, FiInfo } from "react-icons/fi";
 import CandlestickChart from "@/components/CandleStick/candlestick";
 import LineGraph from "@/components/LineGraph/LIneGraph";
+import axios from "axios";
+import { BASE_URL } from "@/app/config/constraints";
+import { analysis_signals_endpoint, analysis_indicators_endpoint } from "@/app/config/endpoint";
 
 const ShareDataDisplay = ({ sharedata }) => {
-  // console.log("Sharedata:", sharedata);
+  const validatedata = useMemo(() => sharedata.data || [], [sharedata.data]);
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [lineGraphData, setLineGraphData] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [signals, setSignals] = useState(null);
+  const [indicators, setIndicators] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const validatedata = sharedata.data;
-  const initialvisible = 3;
-  const [visibleCount, setVisibleCount] = useState(initialvisible);
-  const [lineGraphData, setLineGraphData] = useState();
+  const latestData = validatedata[0];
+  const previousData = validatedata[1];
 
-  const [activeTab, setActiveTab] = useState("candlestick");
+  const formatPrice = (price) => {
+    if (!price) return "N/A";
+    return parseFloat(price).toLocaleString("en-NP", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
+  // Use percentage_change from API (calculated correctly on backend)
+  // Fallback calculation using previous_day_close_price if API doesn't provide it
+  const calculateChange = () => {
+    // First try to use percentage_change from API
+    if (latestData?.percentage_change !== null && latestData?.percentage_change !== undefined) {
+      return parseFloat(latestData.percentage_change);
+    }
+    // Fallback: use previous_day_close_price (correct formula)
+    if (latestData?.close_price && latestData?.previous_day_close_price && latestData.previous_day_close_price > 0) {
+      return ((parseFloat(latestData.close_price) - parseFloat(latestData.previous_day_close_price)) / parseFloat(latestData.previous_day_close_price)) * 100;
+    }
+    return null;
+  };
+
+  const change = calculateChange();
+  const isGain = change !== null && change > 0;
+
+  // Fetch signals and indicators
   useEffect(() => {
-    if (sharedata?.data?.length) {
+    const fetchAnalysis = async () => {
+      setLoading(true);
+      try {
+        const [signalsRes, indicatorsRes] = await Promise.all([
+          axios.get(`${BASE_URL}${analysis_signals_endpoint}?symbol=${sharedata.symbol}`),
+          axios.get(`${BASE_URL}${analysis_indicators_endpoint}?symbol=${sharedata.symbol}&days=30`),
+        ]);
+        setSignals(signalsRes.data);
+        setIndicators(indicatorsRes.data);
+      } catch (err) {
+        console.error("Error fetching analysis:", err);
+      }
+      setLoading(false);
+    };
+
+    if (sharedata.symbol) {
+      fetchAnalysis();
+    }
+  }, [sharedata.symbol]);
+
+  // Prepare line graph data
+  useEffect(() => {
+    if (validatedata?.length) {
       const labels = [];
       const actualData = [];
       const ltsmPredictedData = [];
       const rfPredictedData = [];
 
-      // Loop through the data to arrange today's data and yesterday's predictions
-      for (let i = 1; i < sharedata.data.length; i++) {
-        // Start from 1 to ensure we are pairing with previous day's data
-        const currentShare = sharedata.data[i];
-        const previousShare = sharedata.data[i - 1];
+      for (let i = 1; i < validatedata.length && i < 30; i++) {
+        const currentShare = validatedata[i];
+        const previousShare = validatedata[i - 1];
 
-        // Skip null entries and ensure valid data points
-        if (
-          !currentShare ||
-          currentShare.close_price === null ||
-          previousShare.LTSM_predicted_close_price === null
-        )
-          continue;
+        if (!currentShare || currentShare.close_price === null) continue;
 
-        // Add labels and data points: current day's actual price and previous day's prediction
         labels.unshift(currentShare.date || "Unknown Date");
-        actualData.unshift(currentShare.close_price);
-        ltsmPredictedData.unshift(
-          previousShare.LTSM_predicted_close_price ?? null
-        ); // Yesterday's LSTM prediction
-        rfPredictedData.unshift(previousShare.RF_predicted_close_price ?? null); // Yesterday's RF prediction
+        actualData.unshift(parseFloat(currentShare.close_price));
+        ltsmPredictedData.unshift(previousShare?.LSTM_predicted_close_price ? parseFloat(previousShare.LSTM_predicted_close_price) : null);
+        rfPredictedData.unshift(previousShare?.RF_predicted_close_price ? parseFloat(previousShare.RF_predicted_close_price) : null);
       }
 
-      const formattedData = {
+      setLineGraphData({
         labels,
         datasets: [
-          {
-            label: "Actual Data",
-            data: actualData,
-            borderColor: "green",
-            fill: false,
-          },
-          {
-            label: "LSTM Predictions",
-            data: ltsmPredictedData,
-            borderColor: "blue",
-            fill: false,
-          },
-          {
-            label: "RF Predictions",
-            data: rfPredictedData,
-            borderColor: "orange",
-            fill: false,
-          },
+          { label: "Actual Price", data: actualData, borderColor: "#10b981", fill: false },
+          { label: "LSTM Prediction", data: ltsmPredictedData, borderColor: "#3b82f6", fill: false },
+          { label: "RF Prediction", data: rfPredictedData, borderColor: "#f59e0b", fill: false },
         ],
-      };
-
-      setLineGraphData(formattedData);
+      });
     }
-  }, [sharedata]);
+  }, [validatedata]);
 
-  console.log("data", lineGraphData);
-
-  // Candle stick data for the chart
-  const StockCandle = validatedata.map((item) => ({
+  const StockCandle = validatedata.slice(0, 60).map((item) => ({
     x: new Date(item.date),
-    y: [item.open_price, item.high_price, item.low_price, item.close_price],
+    y: [parseFloat(item.open_price), parseFloat(item.high_price), parseFloat(item.low_price), parseFloat(item.close_price)],
   }));
 
-  //prediction handling function
-  const handlePredict = async () => {
-    setLoading(true);
-    setLoading(false);
+  const getSignalBadge = (recommendation) => {
+    const badges = {
+      STRONG_BUY: "signal-strong-buy",
+      BUY: "signal-buy",
+      HOLD: "signal-hold",
+      SELL: "signal-sell",
+      STRONG_SELL: "signal-strong-sell",
+    };
+    return badges[recommendation] || "signal-hold";
   };
 
+  const tabs = [
+    { id: "overview", label: "Overview", icon: FiBarChart2 },
+    { id: "chart", label: "Price Chart", icon: FiActivity },
+    { id: "prediction", label: "Predictions", icon: FiTarget },
+    { id: "technical", label: "Technical Analysis", icon: FiInfo },
+  ];
+
   return (
-    <div className="p-4">
-        {/* Stock Details */}
-        <div className=" flex justify-between mb-6 p-4 border rounded-lg shadow-lg bg-gray-100">
-          <h1 className="text-3xl font-bold mb-2">
-            {sharedata.security_name} ({sharedata.symbol})
-          </h1>
-          <button className="bg-blue-700 rounded-full hover:bg-blue-500 text-white font-bold py-2 px-4 rounded ">
-            <Link
-              href="../Sharelist"
-              className="flex flex-row items-center gap-2 mr-20 text-lg font-bold"
-            >
-              <FaArrowLeft />
-              Back To ShareList
-            </Link>
-          </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <Link href="/Sharelist" className="inline-flex items-center gap-2 text-[var(--color-accent)] hover:underline mb-2">
+            <FiArrowLeft className="w-4 h-4" />
+            Back to Stock List
+          </Link>
+          <h1 className="text-3xl font-bold">{sharedata.symbol}</h1>
+          <p className="text-[var(--foreground-muted)]">{sharedata.security_name}</p>
         </div>
-      {/* block options  */}
-      
-      {/* Stock Details Tab */}
-      <div className="container mx-auto my-4 p-4">
-        <div className="flex border-b">
-          <button
-            className={`px-4 py-2 ${activeTab === "candlestick" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-            onClick={() => setActiveTab("candlestick")}>
-            Candlestick Chart
-          </button>
-          <button
-            className={`px-4 py-2 ${activeTab === "prediction" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-            onClick={() => setActiveTab("prediction")}>
-            Prediction Graph
-          </button>
+        {signals && (
+          <div className="flex items-center gap-4">
+            <span className={getSignalBadge(signals.recommendation)}>
+              {signals.recommendation?.replace("_", " ")}
+            </span>
+            <span className="text-sm text-[var(--foreground-muted)]">
+              Signal Strength: {signals.strength}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Price Overview Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="stat-card">
+          <div className="stat-label">Current Price</div>
+          <div className="stat-value number-mono">Rs. {formatPrice(latestData?.close_price)}</div>
+          <div className={`stat-change ${isGain ? "price-up" : "price-down"}`}>
+            {isGain ? <FiTrendingUp /> : <FiTrendingDown />}
+            {change !== null ? `${isGain ? "+" : ""}${change.toFixed(2)}%` : "N/A"}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Open</div>
+          <div className="stat-value number-mono">{formatPrice(latestData?.open_price)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">High</div>
+          <div className="stat-value number-mono price-up">{formatPrice(latestData?.high_price)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Low</div>
+          <div className="stat-value number-mono price-down">{formatPrice(latestData?.low_price)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Volume</div>
+          <div className="stat-value number-mono">{latestData?.total_traded_quantity?.toLocaleString()}</div>
         </div>
       </div>
-      {/* general block  */}
-      {activeTab=="candlestick" && <div>
 
-        {/* Stock Trading Data */}
-        <h2 className="text-2xl font-bold mb-4">Stock Trading Data</h2>
-        <table className="table-auto w-full bg-gray-200 text-left border-collapse mt-2">
-          <thead>
-            <tr className="border-b">
-              <th className="px-4 py-2">Date</th>
-              <th className="px-4 py-2">Open Price</th>
-              <th className="px-4 py-2">High Price</th>
-              <th className="px-4 py-2">Low Price</th>
-              <th className="px-4 py-2">Close Price</th>
-              <th className="px-4 py-2">LTP</th>
-              <th className="px-4 py-2">Market Cap.</th>
-              <th className="px-4 py-2">LTSM Prediction</th>
-              <th className="px-4 py-2">RF Prediction</th>
-            </tr>
-          </thead>
-          <tbody>
-            {validatedata.slice(0, visibleCount).map((entry) => (
-              <tr
-                key={entry.id}
-                className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
-              >
-                <td className="px-4 py-2">{entry.date}</td>
-                <td className="px-4 py-2">{entry.open_price}</td>
-                <td className="px-4 py-2">{entry.high_price}</td>
-                <td className="px-4 py-2">{entry.low_price}</td>
-                <td className="px-4 py-2">{entry.close_price}</td>
-                <td className="px-4 py-2">{entry.total_traded_quantity}</td>
-                <td className="px-4 py-2">{entry.market_capitalization}</td>
-                <td className="px-4 py-2">
-                  {entry.LTSM_predicted_close_price}
-                </td>
-                <td className="px-4 py-2">{entry.RF_predicted_close_price}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-between mt-4 space-x-4">
-          {visibleCount < validatedata.length && (
-            <div className="text-center mt-4">
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-lg hover:bg-blue-700 transition"
-                onClick={() => setVisibleCount(visibleCount + 5)}
-              >
-            
-                {/* Increase visible count by 5 */}
-                See More
-              </button>
+      {/* 52 Week Range */}
+      <div className="card p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-[var(--foreground-muted)]">52 Week Range</span>
+          <span className="text-sm number-mono">
+            {formatPrice(sharedata.fifty_two_weeks_low)} - {formatPrice(sharedata.fifty_two_weeks_high)}
+          </span>
+        </div>
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{
+              width: `${
+                ((parseFloat(latestData?.close_price) - parseFloat(sharedata.fifty_two_weeks_low)) /
+                  (parseFloat(sharedata.fifty_two_weeks_high) - parseFloat(sharedata.fifty_two_weeks_low))) *
+                100
+              }%`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="tab-group">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`tab-item flex items-center gap-2 ${activeTab === tab.id ? "active" : ""}`}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab Content */}
+      <div className="card p-6">
+        {activeTab === "overview" && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold mb-4">Recent Trading Data</h3>
+            <div className="overflow-x-auto">
+              <table className="table-modern">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th className="text-right">Open</th>
+                    <th className="text-right">High</th>
+                    <th className="text-right">Low</th>
+                    <th className="text-right">Close</th>
+                    <th className="text-right">Volume</th>
+                    <th className="text-right">LSTM Pred.</th>
+                    <th className="text-right">RF Pred.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {validatedata.slice(0, visibleCount).map((entry, idx) => (
+                    <tr key={entry.id || idx}>
+                      <td>{entry.date}</td>
+                      <td className="text-right number-mono">{formatPrice(entry.open_price)}</td>
+                      <td className="text-right number-mono">{formatPrice(entry.high_price)}</td>
+                      <td className="text-right number-mono">{formatPrice(entry.low_price)}</td>
+                      <td className="text-right number-mono font-semibold">{formatPrice(entry.close_price)}</td>
+                      <td className="text-right number-mono">{entry.total_traded_quantity?.toLocaleString()}</td>
+                      <td className="text-right number-mono text-[var(--chart-blue)]">
+                        {formatPrice(entry.LSTM_predicted_close_price)}
+                      </td>
+                      <td className="text-right number-mono text-[var(--chart-orange)]">
+                        {formatPrice(entry.RF_predicted_close_price)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-          {visibleCount > initialvisible && (
-            <div className="text-center mt-4">
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded-md shadow-lg hover:bg-red-700 transition"
-                onClick={() => setVisibleCount(initialvisible)}
-              >
-                
-                {/* Reset visible count to initial value */}
-                See Less
-              </button>
+            <div className="flex gap-4">
+              {visibleCount < validatedata.length && (
+                <button onClick={() => setVisibleCount(visibleCount + 10)} className="btn-secondary">
+                  Show More
+                </button>
+              )}
+              {visibleCount > 5 && (
+                <button onClick={() => setVisibleCount(5)} className="btn-secondary">
+                  Show Less
+                </button>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Stock Candlestick Chart */}
-        <div className="mt-20">
-          <CandlestickChart data={StockCandle} />
-        </div>
-      </div>}
+        {activeTab === "chart" && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Candlestick Chart</h3>
+            <CandlestickChart data={StockCandle} />
+          </div>
+        )}
 
-      {/* prediction block  */}
-      {activeTab =="prediction"&&<div>
-        <div className="mt-4 flex px-4 justify-center">
-          <LineGraph data={lineGraphData} />
-        </div>
-        <div>
-          <table className="table-auto w-full bg-gray-200 text-left border-collapse mt-2">
-            <thead>
-              <tr className="border-b">
-                <th className="px-4 py-2">Metric</th>
-                <th className="px-4 py-2">LSTM</th>
-                <th className="px-4 py-2">Random Forest</th>
-                <th className="px-4 py-2">Overall LSTM</th>
-                <th className="px-4 py-2">Overall RF</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
-              >
-                <td className="px-4 py-2">Mean Absolute Error</td>
-                <td className="px-4 py-2">
-                  {sharedata.LTSM_Mean_Absolute_Error}
-                </td>
-                <td className="px-4 py-2">
-                  {sharedata.RF_Mean_Absolute_Error}
-                </td>
-                <td className="px-4 py-2">
-                  {sharedata.Overall_LTSM_Mean_Absolute_Error}
-                </td>
-                <td className="px-4 py-2">
-                  {sharedata.Overall_RF_Mean_Absolute_Error}
-                </td>
-              </tr>
-              <tr
-                className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
-              >
-                <td className="px-4 py-2">R-Square</td>
-                <td className="px-4 py-2">{sharedata.LTSM_R_Square}</td>
-                <td className="px-4 py-2">{sharedata.RF_R_Square}</td>
-                <td className="px-4 py-2">{sharedata.Overall_LTSM_R_Square}</td>
-                <td className="px-4 py-2">{sharedata.Overall_RF_R_Square}</td>
-              </tr>
-              <tr
-                className={`border-b font-mono text-black bg-gray-300 cursor-pointer`}
-              >
-                <td className="px-4 py-2">Tomorrow Prediction</td>
-                <td className="px-4 py-2">
-                  {sharedata.data[0]?.LTSM_predicted_close_price}
-                </td>
-                <td className="px-4 py-2">
-                  {sharedata.data[0]?.RF_predicted_close_price}
-                </td>
-                <td className="px-4 py-2">N/A</td>
-                <td className="px-4 py-2">N/A</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>}
+        {activeTab === "prediction" && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Price Prediction Comparison</h3>
+              {lineGraphData && <LineGraph data={lineGraphData} />}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="card p-4">
+                <h4 className="font-semibold mb-4">Tomorrow&apos;s Prediction</h4>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--foreground-muted)]">LSTM Model</span>
+                    <span className="text-xl font-bold number-mono text-[var(--chart-blue)]">
+                      Rs. {formatPrice(latestData?.LSTM_predicted_close_price)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--foreground-muted)]">Random Forest</span>
+                    <span className="text-xl font-bold number-mono text-[var(--chart-orange)]">
+                      Rs. {formatPrice(latestData?.RF_predicted_close_price)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card p-4">
+                <h4 className="font-semibold mb-4">Model Performance</h4>
+                <div className="overflow-x-auto">
+                  <table className="table-modern">
+                    <thead>
+                      <tr>
+                        <th>Metric</th>
+                        <th className="text-right">LSTM</th>
+                        <th className="text-right">RF</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Mean Absolute Error</td>
+                        <td className="text-right number-mono">{sharedata.LSTM_Mean_Absolute_Error || "N/A"}</td>
+                        <td className="text-right number-mono">{sharedata.RF_Mean_Absolute_Error || "N/A"}</td>
+                      </tr>
+                      <tr>
+                        <td>R-Squared</td>
+                        <td className="text-right number-mono">{sharedata.LSTM_R_Square || "N/A"}</td>
+                        <td className="text-right number-mono">{sharedata.RF_R_Square || "N/A"}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "technical" && (
+          <div className="space-y-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-accent)]"></div>
+              </div>
+            ) : signals ? (
+              <>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="stat-card">
+                    <div className="stat-label">Signal Strength</div>
+                    <div className="stat-value">{signals.strength}</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-label">Recommendation</div>
+                    <div className="stat-value">
+                      <span className={getSignalBadge(signals.recommendation)}>
+                        {signals.recommendation?.replace("_", " ")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-label">Active Signals</div>
+                    <div className="stat-value">{signals.signal_count}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-4">Trading Signals</h4>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {signals.signals?.map((signal, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-4 rounded-lg border ${
+                          signal.strength === "BULLISH"
+                            ? "border-[var(--color-success)] bg-[var(--color-success-bg)]"
+                            : signal.strength === "BEARISH"
+                            ? "border-[var(--color-danger)] bg-[var(--color-danger-bg)]"
+                            : "border-[var(--border-color)] bg-[var(--background-secondary)]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-sm">{signal.indicator}</span>
+                          <span
+                            className={`text-xs font-bold ${
+                              signal.strength === "BULLISH"
+                                ? "text-[var(--color-success)]"
+                                : signal.strength === "BEARISH"
+                                ? "text-[var(--color-danger)]"
+                                : "text-[var(--foreground-muted)]"
+                            }`}
+                          >
+                            {signal.strength}
+                          </span>
+                        </div>
+                        <p className="text-sm text-[var(--foreground-secondary)]">{signal.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {signals.key_levels && (
+                  <div>
+                    <h4 className="font-semibold mb-4">Key Price Levels</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="card p-4">
+                        <div className="text-sm text-[var(--foreground-muted)] mb-1">Support</div>
+                        <div className="text-lg font-bold number-mono price-up">
+                          Rs. {formatPrice(signals.key_levels.support)}
+                        </div>
+                      </div>
+                      <div className="card p-4">
+                        <div className="text-sm text-[var(--foreground-muted)] mb-1">Resistance</div>
+                        <div className="text-lg font-bold number-mono price-down">
+                          Rs. {formatPrice(signals.key_levels.resistance)}
+                        </div>
+                      </div>
+                      <div className="card p-4">
+                        <div className="text-sm text-[var(--foreground-muted)] mb-1">SMA 20</div>
+                        <div className="text-lg font-bold number-mono">
+                          Rs. {formatPrice(signals.key_levels.sma_20)}
+                        </div>
+                      </div>
+                      <div className="card p-4">
+                        <div className="text-sm text-[var(--foreground-muted)] mb-1">SMA 50</div>
+                        <div className="text-lg font-bold number-mono">
+                          Rs. {formatPrice(signals.key_levels.sma_50)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-[var(--foreground-muted)] text-center py-8">
+                Technical analysis data not available for this stock.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

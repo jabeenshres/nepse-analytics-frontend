@@ -1,180 +1,281 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 import { removeCookies } from "@/app/utils/setCookies";
 import { useState } from "react";
+import { useTheme } from "@/app/lib/ThemeContext";
+
+// Icon components
+const Icons = {
+  Home: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  ),
+  Chart: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+    </svg>
+  ),
+  TrendingUp: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+    </svg>
+  ),
+  Globe: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+    </svg>
+  ),
+  Filter: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+    </svg>
+  ),
+  Download: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+  ),
+  Users: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
+  Login: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+    </svg>
+  ),
+  Logout: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+    </svg>
+  ),
+  Menu: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  ),
+  Close: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
+  Info: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Sun: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
+  Moon: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  ),
+};
 
 function Navbar({ role }) {
-    const router = useRouter();
-    const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
-    console.log("navbar", role);
-    const handleLogout = async () => {
-        try {
-            await removeCookies("token");
-            // toast.success("Logged out successfully!", { position: "top-right" });
+  const handleLogout = async () => {
+    try {
+      await removeCookies("token");
+      setTimeout(() => {
+        router.push("/Login");
+      }, 500);
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
-            // Redirect after a short delay for a smooth user experience
-            setTimeout(() => {
-                router.push("/Login");
-            }, 1000);
-        } catch (error) {
-            console.error("Error during logout:", error);
-            // toast.error("Logout failed! Please try again.", { position: "top-right" });
-        }
-    };
+  const isActive = (path) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
 
+  const navItems = [
+    { name: "Dashboard", path: "/", icon: Icons.Home, public: true },
+    { name: "Stock Prices", path: "/Sharelist", icon: Icons.Chart, public: true },
+    { name: "Top Stocks", path: "/TopStocks", icon: Icons.TrendingUp, public: true },
+    { name: "NEPSE Indices", path: "/Indices", icon: Icons.Globe, public: true },
+    { name: "Screener", path: "/Screener", icon: Icons.Filter, public: true },
+    { name: "About", path: "/About", icon: Icons.Info, public: true },
+  ];
 
-    return (
-        <div>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden fixed top-4 left-4 z-50 bg-gray-900 p-2 rounded-md text-white"
-            >    ☰
-            </button>
-            <aside
-                id="logo-sidebar"
-                className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-                    } sm:translate-x-0 bg-gray-900 border-gray-900`}
-                aria-label="Sidebar"
-            >
-                <nav className="fixed top-0 z-50 w-full bg-gray-900 border-gray-900">
-                    <div className="px-3 py-3 lg:px-5 lg:pl-3">
-                        <div className="flex items-center justify-between">
-                            <Link href="../" className="flex ms-2 md:me-24">
-                                <img
-                                    src="/images/sharelogom.png"
-                                    className="h-10 me-3 sm:h-15"
-                                    alt="ShareNepal Logo"
-                                />
-                                <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-white">
-                                    SHARE NEPAL
-                                </span>
-                            </Link>
-                            <button onClick={() => setIsOpen(false)} className="md:hidden text-white text-xl">
-                                ✕
-                            </button>
-                        </div>
-                    </div>
-                </nav>
-                <div className="h-full px-3 pb-4 overflow-y-auto bg-gray-900">
-                    <ul className="space-y-2 font-medium">
-                        <li>
-                            <Link
-                                href="../"
-                                className="flex items-center p-2 rounded-lg text-white  hover:bg-gray-700 group"
-                            >
-                                <svg
-                                    className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400  group-hover:text-white"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="currentColor"
-                                    viewBox="0 0 18 18"
-                                >
-                                    <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
-                                </svg>
-                                <span className="flex-1 ms-3 whitespace-nowrap">Home</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="../Sharelist"
-                                className="flex items-center p-2 rounded-lg text-white  hover:bg-gray-700 group"
-                            >
-                                <svg
-                                    className="w-5 h-5  transition duration-75 text-gray-400  group-hover:text-white"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="currentColor"
-                                    viewBox="0 0 22 21"
-                                >
-                                    <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" />
-                                    <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
-                                </svg>
-                                <span className="ms-3">Stock Price</span>
-                            </Link>
-                        </li>
+  const adminItems = [
+    { name: "Download Data", path: "/Download", icon: Icons.Download, roles: ["admin", "manager"] },
+    { name: "Users", path: "/Users", icon: Icons.Users, roles: ["admin"] },
+  ];
 
-                        <li>
-                            <Link
-                                href="../About"
-                                className="flex items-center p-2  rounded-lg text-white  hover:bg-gray-700 group"
-                            >
-                                <svg
-                                    className="flex-shrink-0 w-5 h-5  transition duration-75 text-gray-400  group-hover:text-white"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z" />
-                                    <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
-                                    <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
-                                </svg>
-                                <span className="flex-1 ms-3 whitespace-nowrap">About Us </span>
-                            </Link>
-                        </li>
+  return (
+    <>
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg"
+        style={{ background: 'var(--sidebar-bg)', color: 'var(--sidebar-text)' }}
+      >
+        {isOpen ? <Icons.Close /> : <Icons.Menu />}
+      </button>
 
-                        {(role === "admin" || role === "manager") && (
-                            <li>
-                                <Link
-                                    href="../Download"
-                                    className="flex items-center p-2  rounded-lg text-white hover:bg-gray-700 group"
-                                >
-                                    <svg className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400  group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fillRule="evenodd" d="M13 11.15V4a1 1 0 1 0-2 0v7.15L8.78 8.374a1 1 0 1 0-1.56 1.25l4 5a1 1 0 0 0 1.56 0l4-5a1 1 0 1 0-1.56-1.25L13 11.15Z" clipRule="evenodd" />
-                                        <path fillRule="evenodd" d="M9.657 15.874 7.358 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2.358l-2.3 2.874a3 3 0 0 1-4.685 0ZM17 16a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H17Z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="flex-1 ms-3 whitespace-nowrap">Download</span>
-                                </Link>
-                            </li>
-                        )}
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
 
-                        {role == "admin" && (
-                            <li>
-                                <Link href="../Users" className="flex items-center p-2  rounded-lg text-white hover:bg-gray-700 group">
-                                    <svg className="shrink-0 w-5 h-5  transition duration-75 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                                        <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
-                                    </svg>
-                                    <span className="flex-1 ms-3 whitespace-nowrap">Users</span>
-                                </Link>
-                            </li>
-                        )}
-
-                        {role === "not-login" && (
-                            <li>
-                                <Link
-                                    href="../Login"
-                                    className="flex items-center p-2  rounded-lg text-white  hover:bg-gray-700 group"
-                                >
-                                    <svg
-                                        className="shrink-0 w-5 h-5  transition duration-75 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 18"
-                                    >
-                                        <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
-                                    </svg>
-                                    <span className="flex-1 ms-3 whitespace-nowrap">Sign In</span>
-                                </Link>
-                            </li>
-                        )}
-                        <li>
-                            {role !== "not-login" && (
-                                <button
-                                    onClick={() => handleLogout()}
-                                    className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700  group w-full absolute bottom-5 left-0"
-                                >
-                                    Logout
-                                </button>
-                            )}
-                        </li>
-                    </ul>
-                </div>
-            </aside>
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+        style={{
+          background: "var(--sidebar-bg)",
+          borderRight: "1px solid rgba(148, 163, 184, 0.1)",
+        }}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-between h-16 px-4 border-b" style={{ borderColor: "rgba(148, 163, 184, 0.1)" }}>
+          <Link href="/" className="flex items-center gap-3">
+            <Image src="/images/sharelogom.png" width={40} height={40} alt="ShareNepal Logo" />
+            <div>
+              <span className="text-lg font-bold" style={{ color: 'var(--sidebar-text)' }}>SHARE NEPAL</span>
+              <p className="text-xs" style={{ color: "rgba(148, 163, 184, 0.7)" }}>Stock Analysis</p>
+            </div>
+          </Link>
         </div>
-    );
+
+        {/* Navigation */}
+        <nav className="flex flex-col h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="flex-1 px-3 py-4 space-y-1">
+            <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(148, 163, 184, 0.7)" }}>
+              Navigation
+            </p>
+            
+            {navItems.map((item) => {
+              const IconComponent = item.icon;
+              const active = isActive(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                    active
+                      ? "bg-[var(--color-accent)] text-white"
+                      : ""
+                  }`}
+                  style={!active ? { color: 'var(--sidebar-text)' } : {}}
+                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
+                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <IconComponent />
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+
+            {/* Admin Section */}
+            {(role === "admin" || role === "manager") && (
+              <>
+                <div className="pt-4">
+                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(148, 163, 184, 0.7)" }}>
+                    Admin
+                  </p>
+                </div>
+                {adminItems.map((item) => {
+                  if (!item.roles.includes(role)) return null;
+                  const IconComponent = item.icon;
+                  const active = isActive(item.path);
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                        active
+                          ? "bg-[var(--color-accent)] text-white"
+                          : ""
+                      }`}
+                      style={!active ? { color: 'var(--sidebar-text)' } : {}}
+                      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
+                      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <IconComponent />
+                      <span className="font-medium">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
+          </div>
+
+          {/* Theme Toggle & Auth Section */}
+          <div className="p-3 border-t" style={{ borderColor: "rgba(148, 163, 184, 0.1)" }}>
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg w-full mb-3 transition-all duration-200"
+              style={{ color: 'var(--sidebar-text)' }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--sidebar-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              {theme === "dark" ? <Icons.Sun /> : <Icons.Moon />}
+              <span className="font-medium">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+            </button>
+
+            {role === "not-login" ? (
+              <Link
+                href="/Login"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 btn-primary w-full justify-center"
+              >
+                <Icons.Login />
+                <span className="font-medium">Sign In</span>
+              </Link>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="w-8 h-8 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white font-bold">
+                    {role.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: 'var(--sidebar-text)' }}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </p>
+                    <p className="text-xs" style={{ color: "rgba(148, 163, 184, 0.7)" }}>
+                      Logged in
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 w-full"
+                  style={{ color: 'var(--color-danger)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-danger-bg)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <Icons.Logout />
+                  <span className="font-medium">Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </nav>
+      </aside>
+    </>
+  );
 }
 
 export default Navbar;

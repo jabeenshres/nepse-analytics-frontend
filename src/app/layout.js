@@ -1,6 +1,9 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import Sidebar from "@/components/Navbar/sidebar";
+import { ThemeProvider } from "./lib/ThemeContext";
+import { Suspense } from "react";
+import LoadingBar from "@/components/LoadingBar/LoadingBar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,33 +29,46 @@ const robertV = localFont({
 });
 
 export const metadata = {
-  title: "Share Nepal",
-  description: "THREE JS",
+  title: "Share Nepal - Stock Analysis Platform",
+  description: "Comprehensive Nepal Stock Exchange analysis, AI-powered predictions, and portfolio management",
 };
 
-
 export default async function RootLayout({ children }) {
-  
-  // const data = await fetchData();
-  const data = []
   return (
-    <html lang="en">
-      <link rel="icon" href="./sharelogom.ico" sizes="any"></link>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/images/sharelogom.png" sizes="any" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme) {
+                    document.documentElement.setAttribute('data-theme', theme);
+                  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${robertV.variable} ${robertoitalic.variable} antialiased bg-background text-foreground`}>
-          <Sidebar/>
-       {/* <DataWrapper data={data}> */}
-        <div className="p-4 sm:ml-64"> 
-        {children}
-        </div>
-       {/* </DataWrapper> */}
+        className={`${geistSans.variable} ${geistMono.variable} ${robertV.variable} ${robertoitalic.variable} antialiased`}
+        style={{ background: 'var(--background)', color: 'var(--foreground)' }}
+      >
+        <ThemeProvider>
+          <Suspense fallback={null}>
+            <LoadingBar />
+          </Suspense>
+          <Sidebar />
+          <div className="p-4 sm:ml-64 min-h-screen">
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
-
-// function DataWrapper({data,children}) {
-//   return (
-//     <div data-server-data ={JSON.stringify(data)}>{children}</div>
-//   )
-// }

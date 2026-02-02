@@ -1,114 +1,131 @@
 "use client";
-import { useState } from "react";
+import React from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
-  LineElement,
   CategoryScale,
   LinearScale,
   PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
 } from "chart.js";
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const LineGraph = ({ data }) => {
-  if (!data?.labels?.length)
-    return <p className="text-center mt-4 text-red-500">No Data Available</p>;
+  if (!data) return null;
 
-  const [visibleLines, setVisibleLines] = useState({
-    actualData: true,
-    ltsmPredictions: true,
-    rfPredictions: true,
-  });
-
-  const toggleLineVisibility = (line) => {
-    setVisibleLines((prevState) => ({
-      ...prevState,
-      [line]: !prevState[line],
-    }));
-  };
-
-  const chartData = {
-    labels: data.labels,
-    datasets: [
-      {
-        label: "Actual Data",
-        data: data.datasets.find((ds) => ds.label === "Actual Data").data,
-        borderColor: "red",
-        fill: false,
-        hidden: !visibleLines.actualData, // Hide line based on state
-      },
-      {
-        label: "LSTM Predictions",
-        data: data.datasets.find((ds) => ds.label === "LSTM Predictions").data,
-        borderColor: "blue",
-        fill: false,
-        hidden: !visibleLines.ltsmPredictions, // Hide line based on state
-      },
-      {
-        label: "RF Predictions",
-        data: data.datasets.find((ds) => ds.label === "RF Predictions").data,
-        borderColor: "green",
-        fill: false,
-        hidden: !visibleLines.rfPredictions, // Hide line based on state
-      },
-    ],
-  };
-
-  // Chart options to allow responsiveness
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // Allow it to resize freely
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
     plugins: {
       legend: {
-        display: true,
         position: "top",
+        labels: {
+          color: "#94a3b8",
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            size: 12,
+          },
+        },
+      },
+      title: {
+        display: true,
+        text: "Actual vs Predicted Prices",
+        color: "#f1f5f9",
+        font: {
+          size: 18,
+          weight: "600",
+        },
+        padding: {
+          bottom: 20,
+        },
+      },
+      tooltip: {
+        backgroundColor: "#1e293b",
+        titleColor: "#f1f5f9",
+        bodyColor: "#94a3b8",
+        borderColor: "rgba(148, 163, 184, 0.2)",
+        borderWidth: 1,
+        padding: 12,
+        displayColors: true,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: Rs. ${context.parsed.y?.toFixed(2) || "N/A"}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#94a3b8",
+          maxRotation: 45,
+          minRotation: 0,
+        },
+      },
+      y: {
+        grid: {
+          color: "rgba(148, 163, 184, 0.1)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#94a3b8",
+          callback: function(value) {
+            return "Rs. " + value.toFixed(0);
+          },
+        },
+      },
+    },
+    elements: {
+      point: {
+        radius: 3,
+        hoverRadius: 6,
+      },
+      line: {
+        tension: 0.3,
+        borderWidth: 2,
       },
     },
   };
 
-  return (
-    <div>
-      <div className="space-y-2">
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={visibleLines.actualData}
-              onChange={() => toggleLineVisibility("actualData")}
-              className="mr-2"
-            />
-            Actual Data
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={visibleLines.ltsmPredictions}
-              onChange={() => toggleLineVisibility("ltsmPredictions")}
-              className="mr-2"
-            />
-            LSTM Predictions
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={visibleLines.rfPredictions}
-              onChange={() => toggleLineVisibility("rfPredictions")}
-              className="mr-2"
-            />
-            RF Predictions
-          </label>
-        </div>
-      </div>
+  const chartData = {
+    labels: data.labels,
+    datasets: data.datasets.map((dataset, index) => ({
+      ...dataset,
+      borderColor: dataset.borderColor,
+      backgroundColor: dataset.borderColor + "20",
+      pointBackgroundColor: dataset.borderColor,
+      pointBorderColor: "#0a0e1a",
+      pointBorderWidth: 2,
+      fill: index === 0,
+    })),
+  };
 
-      {/* Chart container with specific size */}
-      <div style={{ width: "70vw", height: "60vh" }}>
-        <Line data={chartData} options={options} />
-      </div>
+  return (
+    <div className="w-full h-[400px]">
+      <Line options={options} data={chartData} />
     </div>
   );
 };

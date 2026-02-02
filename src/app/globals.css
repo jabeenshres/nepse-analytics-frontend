@@ -2,3 +2,208 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Light Theme (Default) */
+  :root {
+    --color-primary: #1e40af;
+    --color-primary-light: #3b82f6;
+    --color-accent: #2563eb;
+    --color-accent-light: #60a5fa;
+    --color-success: #16a34a;
+    --color-success-light: #22c55e;
+    --color-success-bg: rgba(22, 163, 74, 0.1);
+    --color-danger: #dc2626;
+    --color-danger-light: #ef4444;
+    --color-danger-bg: rgba(220, 38, 38, 0.1);
+    --color-warning: #d97706;
+    --color-warning-light: #f59e0b;
+    --color-neutral-400: #9ca3af;
+    --color-neutral-500: #6b7280;
+    --color-neutral-600: #4b5563;
+    --color-neutral-800: #1f2937;
+    --background: #f8fafc;
+    --background-secondary: #ffffff;
+    --background-tertiary: #f1f5f9;
+    --background-card: rgba(255, 255, 255, 0.95);
+    --foreground: #0f172a;
+    --foreground-secondary: #475569;
+    --foreground-muted: #64748b;
+    --border-color: rgba(100, 116, 139, 0.2);
+    --border-color-light: rgba(100, 116, 139, 0.1);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.15);
+    --gradient-accent: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    --gradient-success: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+    --gradient-danger: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    --chart-green: #16a34a;
+    --chart-red: #dc2626;
+    --chart-blue: #2563eb;
+    --chart-purple: #7c3aed;
+    --chart-orange: #d97706;
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #f1f5f9;
+    --sidebar-hover: #334155;
+  }
+
+  /* Dark Theme */
+  [data-theme="dark"] {
+    --color-primary: #0f172a;
+    --color-primary-light: #1e293b;
+    --color-accent: #3b82f6;
+    --color-accent-light: #60a5fa;
+    --color-success: #10b981;
+    --color-success-light: #34d399;
+    --color-success-bg: rgba(16, 185, 129, 0.15);
+    --color-danger: #ef4444;
+    --color-danger-light: #f87171;
+    --color-danger-bg: rgba(239, 68, 68, 0.15);
+    --color-warning: #f59e0b;
+    --color-warning-light: #fbbf24;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-800: #1e293b;
+    --background: #0a0e1a;
+    --background-secondary: #111827;
+    --background-tertiary: #1f2937;
+    --background-card: rgba(30, 41, 59, 0.85);
+    --foreground: #f1f5f9;
+    --foreground-secondary: #94a3b8;
+    --foreground-muted: #64748b;
+    --border-color: rgba(148, 163, 184, 0.2);
+    --border-color-light: rgba(148, 163, 184, 0.1);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    --chart-green: #22c55e;
+    --chart-red: #ef4444;
+    --chart-blue: #3b82f6;
+    --chart-purple: #8b5cf6;
+    --chart-orange: #f59e0b;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #f1f5f9;
+    --sidebar-hover: #1e293b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--background-secondary); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--color-neutral-500); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-neutral-400); }
+
+@layer components {
+  .card {
+    @apply rounded-xl border;
+    background: var(--background-card);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+  }
+  .card-hover { @apply card; }
+  .card-hover:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--color-accent); }
+
+  .btn { @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2; }
+  .btn-primary { @apply btn text-white; background: var(--gradient-accent); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-glow); }
+  .btn-secondary { @apply btn border; background: var(--background-secondary); border-color: var(--border-color); color: var(--foreground); }
+  .btn-secondary:hover { background: var(--background-tertiary); border-color: var(--color-accent); }
+  .btn-success { @apply btn text-white; background: var(--gradient-success); }
+  .btn-danger { @apply btn text-white; background: var(--gradient-danger); }
+
+  .badge-gain { @apply px-3 py-1 rounded-full text-sm font-semibold inline-flex items-center gap-1; background: var(--color-success-bg); color: var(--color-success); }
+  .badge-loss { @apply px-3 py-1 rounded-full text-sm font-semibold inline-flex items-center gap-1; background: var(--color-danger-bg); color: var(--color-danger); }
+
+  .table-modern { @apply w-full; border-collapse: separate; border-spacing: 0; }
+  .table-modern thead { @apply sticky top-0 z-10; }
+  .table-modern th { @apply px-4 py-3 text-left text-sm font-semibold; background: var(--background-tertiary); color: var(--foreground-secondary); border-bottom: 1px solid var(--border-color); }
+  .table-modern th:first-child { @apply rounded-tl-lg; }
+  .table-modern th:last-child { @apply rounded-tr-lg; }
+  .table-modern td { @apply px-4 py-3 text-sm; border-bottom: 1px solid var(--border-color-light); color: var(--foreground); }
+  .table-modern tbody tr { @apply transition-colors duration-150; }
+  .table-modern tbody tr:hover { background: var(--background-tertiary); }
+  .table-modern tbody tr.row-gain { background: var(--color-success-bg); }
+  .table-modern tbody tr.row-loss { background: var(--color-danger-bg); }
+
+  .stat-card { @apply card p-6; }
+  .stat-card .stat-label { @apply text-sm font-medium; color: var(--foreground-secondary); }
+  .stat-card .stat-value { @apply text-2xl font-bold mt-1; color: var(--foreground); }
+  .stat-card .stat-change { @apply text-sm mt-2 flex items-center gap-1; }
+
+  .input-field { @apply w-full px-4 py-2.5 rounded-lg text-sm transition-all duration-200; background: var(--background-secondary); border: 1px solid var(--border-color); color: var(--foreground); }
+  .input-field:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); outline: none; }
+  .input-field::placeholder { color: var(--foreground-muted); }
+
+  .signal-strong-buy { @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide text-white; background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-light) 100%); }
+  .signal-buy { @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide; background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success); }
+  .signal-hold { @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide; background: rgba(148, 163, 184, 0.15); color: var(--color-neutral-500); border: 1px solid var(--color-neutral-500); }
+  .signal-sell { @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide; background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger); }
+  .signal-strong-sell { @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide text-white; background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-light) 100%); }
+  .alert-watch { @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide; background: rgba(217, 119, 6, 0.15); color: var(--color-warning); border: 1px solid var(--color-warning); }
+
+  .tab-group { @apply flex gap-1 p-1 rounded-xl; background: var(--background-tertiary); }
+  .tab-item { @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200; color: var(--foreground-secondary); }
+  .tab-item:hover { color: var(--foreground); background: var(--background-secondary); }
+  .tab-item.active { background: var(--color-accent); color: white; }
+
+  .skeleton { @apply rounded-lg; background: linear-gradient(90deg, var(--background-secondary) 0%, var(--background-tertiary) 50%, var(--background-secondary) 100%); background-size: 200% 100%; animation: skeleton-loading 1.5s ease-in-out infinite; }
+
+  .price-up { color: var(--color-success); }
+  .price-down { color: var(--color-danger); }
+  .price-neutral { color: var(--foreground-secondary); }
+
+  .progress-bar { @apply h-2 rounded-full overflow-hidden; background: var(--background-tertiary); }
+  .progress-bar .progress-fill { @apply h-full rounded-full transition-all duration-500; background: var(--gradient-accent); }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+.stagger-children > * { animation: fadeIn 0.3s ease-out forwards; animation-fill-mode: both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+
+@layer utilities {
+  .text-gradient { @apply bg-clip-text text-transparent; background-image: var(--gradient-accent); }
+  .number-mono { font-family: var(--font-geist-mono), 'SF Mono', monospace; font-variant-numeric: tabular-nums; }
+}
+
+.apexcharts-canvas { background: transparent !important; }
+.apexcharts-text { fill: var(--foreground-secondary) !important; }
+.apexcharts-title-text { fill: var(--foreground) !important; }
+.apexcharts-legend-text { color: var(--foreground-secondary) !important; }
+.apexcharts-gridline { stroke: var(--border-color-light) !important; }
+.apexcharts-tooltip { background: var(--background-secondary) !important; border: 1px solid var(--border-color) !important; color: var(--foreground) !important; border-radius: 8px !important; }
+.apexcharts-tooltip-title { background: var(--background-tertiary) !important; border-bottom: 1px solid var(--border-color) !important; color: var(--foreground) !important; }

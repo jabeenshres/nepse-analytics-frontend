@@ -1,199 +1,307 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BiSearchAlt } from "react-icons/bi";
-// import { toast } from "react-toastify";
+import { FiSearch, FiTrendingUp, FiTrendingDown, FiCalendar, FiFilter, FiX, FiLayers } from "react-icons/fi";
+
+const STOCK_TYPES = [
+  { value: "stock", label: "Stocks" },
+  { value: "mutual_fund", label: "Mutual Funds" },
+  { value: "debenture", label: "Debentures" },
+  { value: "all", label: "All Types" },
+];
 
 export default function FetchTable({
   datas,
   searchTerm: initialSearchTerm,
   gainer: initialGainer,
-  date: initialDate, // Added initialDate prop
+  date: initialDate,
+  stockType: initialStockType = "stock",
 }) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm || "");
   const [gainer, setGainer] = useState(initialGainer === "1");
-  const [isChecklistChecked, setIsChecklistChecked] = useState(initialGainer === "1");
+  const [isChecklistChecked, setIsChecklistChecked] = useState(initialGainer === "1" || initialGainer === "0");
   const [selectedDate, setSelectedDate] = useState(initialDate || "");
+  const [stockType, setStockType] = useState(initialStockType);
   const router = useRouter();
 
-  // toast.configure();
-  // Handle Search Button Click
+  const buildQueryString = (updates = {}) => {
+    const params = new URLSearchParams();
+    
+    const finalStockType = updates.stockType !== undefined ? updates.stockType : stockType;
+    const finalSearch = updates.search !== undefined ? updates.search : searchTerm;
+    const finalDate = updates.date !== undefined ? updates.date : selectedDate;
+    const finalGainer = updates.gainer !== undefined ? updates.gainer : (isChecklistChecked ? (gainer ? "1" : "0") : "");
+    
+    if (finalStockType && finalStockType !== "stock") params.set("stock_type", finalStockType);
+    if (finalStockType === "stock") params.set("stock_type", "stock"); // Always include for stocks too
+    if (finalSearch) params.set("search", finalSearch);
+    if (finalDate) params.set("date", finalDate);
+    if (finalGainer) params.set("gainer", finalGainer);
+    
+    return params.toString();
+  };
+
   const handleSearch = () => {
-    try {
-      const queryParams = new URLSearchParams(window.location.search);
-      
-      if (searchTerm) queryParams.set("search", searchTerm);
-      else queryParams.delete("search");
-  
-      queryParams.delete("page"); // Reset pagination
-      router.push(`?${queryParams.toString()}`);
-      setError(null); // Clear any previous errors
-    } catch (error) {
-      console.error("Error in handleSearch:", error);
-      // toast.error("Failed to update search parameters!", { position: "top-right" });
-    }
+    const query = buildQueryString({ search: searchTerm });
+    router.push(`/Sharelist?${query}`);
   };
 
-  // Handle Gainer Toggle
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
   const handleGainerToggle = (isChecked) => {
-    try {
-      const queryParams = new URLSearchParams(window.location.search);
-      queryParams.set("gainer", isChecked ? "1" : "0");
-      queryParams.delete("page"); // Reset pagination
-      router.push(`?${queryParams.toString()}`);
-      setError(null);
-    } catch (error) {
-      console.error("Error in handleGainerToggle:", error);
-      // toast.error("Something went wrong while toggling gainer!", { position: "top-right" });
-    }
+    setGainer(isChecked);
+    const query = buildQueryString({ gainer: isChecked ? "1" : "0" });
+    router.push(`/Sharelist?${query}`);
   };
 
-  // Handle Checklist Toggle
   const handleChecklistToggle = (isChecked) => {
-    try {
-      setIsChecklistChecked(isChecked);
-      const queryParams = new URLSearchParams(window.location.search);
-  
-      if (!isChecked) {
-        queryParams.delete("gainer");
-        setGainer(false);
-      }
-  
-      queryParams.delete("page"); // Reset pagination
-      router.push(`?${queryParams.toString()}`);
-      setError(null);
-    } catch (error) {
-      console.error("Error in handleChecklistToggle:", error);
-      toast.error("Failed to update checklist!", { position: "top-right" });
+    setIsChecklistChecked(isChecked);
+    if (!isChecked) {
+      setGainer(false);
+      const params = new URLSearchParams();
+      if (stockType) params.set("stock_type", stockType);
+      if (searchTerm) params.set("search", searchTerm);
+      if (selectedDate) params.set("date", selectedDate);
+      router.push(`/Sharelist?${params.toString()}`);
     }
   };
 
-  // Handle Date Change
   const handleDateChange = (event) => {
-    try {
-      const newDate = event.target.value;
-      setSelectedDate(newDate);
-  
-      const queryParams = new URLSearchParams(window.location.search);
-  
-      if (newDate) queryParams.set("date", newDate);
-      else queryParams.delete("date");
-  
-      queryParams.delete("page"); // Reset pagination
-      router.push(`?${queryParams.toString()}`);
-      setError(null);
-    } catch (error) {
-      console.error("Error in handleDateChange:", error);
-      toast.error("Failed to update date selection!", { position: "top-right" });
-    }
+    const newDate = event.target.value;
+    setSelectedDate(newDate);
+    const query = buildQueryString({ date: newDate });
+    router.push(`/Sharelist?${query}`);
   };
+
+  const handleStockTypeChange = (newType) => {
+    setStockType(newType);
+    const query = buildQueryString({ stockType: newType });
+    router.push(`/Sharelist?${query}`);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedDate("");
+    setGainer(false);
+    setIsChecklistChecked(false);
+    setStockType("stock");
+    router.push("/Sharelist?stock_type=stock");
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return "N/A";
+    return parseFloat(price).toLocaleString("en-NP", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  // Use percentage_change from API (calculated correctly on backend)
+  // Fallback calculation using previous_day_close_price if API doesn't provide it
+  const calculateChange = (data) => {
+    // First try to use percentage_change from API
+    if (data?.percentage_change !== null && data?.percentage_change !== undefined) {
+      return parseFloat(data.percentage_change);
+    }
+    // Fallback: use previous_day_close_price (correct formula)
+    if (data?.close_price && data?.previous_day_close_price && data.previous_day_close_price > 0) {
+      return ((parseFloat(data.close_price) - parseFloat(data.previous_day_close_price)) / parseFloat(data.previous_day_close_price)) * 100;
+    }
+    return null;
+  };
+
+  const hasFilters = searchTerm || selectedDate || isChecklistChecked || stockType !== "stock";
 
   return (
-    <div className="container mx-auto p-4 rounded-lg font-family-roboto">
-      {/* Search and Gainer Controls */}
-      <div className="flex justify-between items-center mb-4 w-full bg-gray-100 h-16 text-2xl rounded-lg shadow-xl">
-        <h1 className="text-2xl font-bold ml-10">Stock Price List</h1>
-        <div className="flex items-center mr-4 space-x-4">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Stock Prices</h1>
+          <p className="text-[var(--foreground-muted)]">
+            View and analyze {stockType === "all" ? "all securities" : STOCK_TYPES.find(t => t.value === stockType)?.label.toLowerCase()} on Nepal Stock Exchange
+          </p>
+        </div>
+      </div>
 
-          {/* Checklist and Gainer Toggle */}
-          <div className="flex items-center space-x-4">
-            {/* Checklist */}
-            <div className="flex items-center space-x-2">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isChecklistChecked}
-                  onChange={(e) => handleChecklistToggle(e.target.checked)}
-                  className="hidden"
-                />
-                <div className={`w-10 h-5 rounded-full ${isChecklistChecked ? "bg-yellow-300" : "bg-gray-300"} relative`}>
-                  <div className={`w-4 h-4 bg-white rounded-full shadow-md absolute top-0.5 transform ${isChecklistChecked ? "translate-x-5" : "translate-x-0.5"} transition-transform`} />
-                </div>
-              </label>
-              <span className="text-sm">Enable Filter</span>
-            </div>
-
-            {/* Gainer Toggle */}
-            <div className="flex items-center space-x-2">
-              {gainer?<span className="text-sm">Gainer:</span>:
-              <span className="text-sm">Looser:</span>}
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={gainer}
-                  onChange={(e) => {
-                    setGainer(e.target.checked);
-                    handleGainerToggle(e.target.checked);
-                  }}
-                  disabled={!isChecklistChecked}
-                  className="hidden"
-                />
-                <div className={`w-10 h-5 rounded-full ${isChecklistChecked ? (gainer ? "bg-green-500" : "bg-red-500") : "bg-gray-300"} relative ${isChecklistChecked ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
-                  <div className={`w-4 h-4 bg-white rounded-full shadow-md absolute top-0.5 transform ${gainer ? "translate-x-5" : "translate-x-0.5"} transition-transform`} />
-                </div>  
-              </label>
-            </div>
+      {/* Stock Type Filter */}
+      <div className="card p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <FiLayers className="text-[var(--foreground-muted)]" />
+            <span className="text-sm font-medium">Security Type:</span>
           </div>
-
-          {/* Date Filter */}
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">Date:</span>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              className="border border-gray-300 text-sm rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-300"
-            />
-          </div>
-
-          {/* Search Input */}
-          <div className="flex items-center">
-            <input
-              type="text"
-              placeholder="Search Stocks..."
-              className="border border-gray-300 text-sm rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-300"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button onClick={handleSearch} className="ml-2 px-4 py-2 hover:bg-red-500 hover:text-gray-900 rounded-full bg-green-500 text-white">
-              <BiSearchAlt />
-            </button>
+          <div className="flex flex-wrap gap-2">
+            {STOCK_TYPES.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => handleStockTypeChange(type.value)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  stockType === type.value
+                    ? "bg-[var(--color-accent)] text-white"
+                    : "bg-[var(--background-secondary)] text-[var(--foreground-secondary)] hover:bg-[var(--background-tertiary)] border border-[var(--border-color)]"
+                }`}
+              >
+                {type.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
+      {/* Other Filters */}
+      <div className="card p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Search Input */}
+          <div className="relative flex-1 min-w-[200px]">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
+            <input
+              type="text"
+              placeholder="Search by symbol or company name..."
+              className="input-field pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+          </div>
+
+          {/* Date Filter */}
+          <div className="relative">
+            <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className="input-field pl-10 w-44"
+            />
+          </div>
+
+          {/* Gainer/Loser Toggle */}
+          <div className="flex items-center gap-4 px-4 py-2 rounded-lg bg-[var(--background-secondary)]">
+            <div className="flex items-center gap-2">
+              <FiFilter className="text-[var(--foreground-muted)]" />
+              <span className="text-sm">Filter:</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isChecklistChecked}
+                  onChange={(e) => handleChecklistToggle(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-[var(--background-tertiary)] rounded-full peer peer-checked:bg-[var(--color-accent)] transition-colors">
+                  <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${isChecklistChecked ? "translate-x-4" : "translate-x-0.5"}`} />
+                </div>
+              </label>
+            </div>
+
+            {isChecklistChecked && (
+              <div className="flex items-center gap-2 border-l border-[var(--border-color)] pl-4">
+                <span className={`text-sm ${gainer ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+                  {gainer ? "Gainers" : "Losers"}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={gainer}
+                    onChange={(e) => handleGainerToggle(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className={`w-9 h-5 rounded-full transition-colors ${gainer ? "bg-[var(--color-success)]" : "bg-[var(--color-danger)]"}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${gainer ? "translate-x-4" : "translate-x-0.5"}`} />
+                  </div>
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* Search Button */}
+          <button onClick={handleSearch} className="btn-primary">
+            Search
+          </button>
+
+          {/* Clear Filters */}
+          {hasFilters && (
+            <button onClick={clearFilters} className="btn-secondary flex items-center gap-2">
+              <FiX className="w-4 h-4" />
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Table */}
-      <div className="overflow-auto relative bg-white p-4 shadow-md">
-        <table className="min-w-full shadow-xl rounded-lg">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="px-4 py-2 border border-gray-300 text-left">Stocks</th>
-              <th className="px-4 py-2 border border-gray-300 text-left">Company Name</th>
-              <th className="px-4 py-2 border border-gray-300 text-left">Open Price</th>
-              <th className="px-4 py-2 border border-gray-300 text-left">High Price</th>
-              <th className="px-4 py-2 border border-gray-300 text-left">Low Price</th>
-              <th className="px-4 py-2 border border-gray-300 text-left">Close Price</th>
-              <th className="px-4 py-2 border border-gray-300 text-left">LTP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {datas.map((stock) => (
-              <tr
-                key={stock.id}
-                className={`font-mono  text-white ${stock.data[0].close_price > stock.data[0].open_price ? "bg-green-600" : "bg-red-600"} cursor-pointer`}
-                onClick={() => router.push(`/Sharelist/${stock.id}`)}
-              >
-                <td className="px-4 py-2 border border-gray-300">{stock.symbol}</td>
-                <td className="px-4 py-2 border border-gray-300">{stock.security_name}</td>
-                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].open_price}</td>
-                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].high_price}</td>
-                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].low_price}</td>
-                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].close_price}</td>
-                <td className="px-4 py-2 border border-gray-300 text-center">{stock.data[0].last_updated_price}</td>
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table-modern">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Company Name</th>
+                <th className="text-right">Open</th>
+                <th className="text-right">High</th>
+                <th className="text-right">Low</th>
+                <th className="text-right">Close</th>
+                <th className="text-right">LTP</th>
+                <th className="text-right">Change</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {datas?.length > 0 ? (
+                datas.map((stock, index) => {
+                  const data = stock.data?.[0];
+                  // Use percentage_change from API (preferred) or calculate from data
+                  const change = stock.percentage_change ?? data?.percentage_change ?? calculateChange(data);
+                  const isGain = change !== null && change > 0;
+
+                  return (
+                    <tr
+                      key={stock.id}
+                      className={`cursor-pointer ${isGain ? "row-gain" : "row-loss"}`}
+                      onClick={() => router.push(`/Sharelist/${stock.id}`)}
+                      style={{ animationDelay: `${index * 20}ms` }}
+                    >
+                      <td>
+                        <span className="font-semibold">{stock.symbol}</span>
+                      </td>
+                      <td>
+                        <span className="text-[var(--foreground-secondary)] truncate block max-w-[200px]">
+                          {stock.security_name}
+                        </span>
+                      </td>
+                      <td className="text-right number-mono">{formatPrice(data?.open_price)}</td>
+                      <td className="text-right number-mono">{formatPrice(data?.high_price)}</td>
+                      <td className="text-right number-mono">{formatPrice(data?.low_price)}</td>
+                      <td className="text-right number-mono font-semibold">{formatPrice(data?.close_price)}</td>
+                      <td className="text-right number-mono">{formatPrice(data?.last_updated_price)}</td>
+                      <td className="text-right">
+                        {change !== null ? (
+                          <span className={`inline-flex items-center gap-1 ${isGain ? "badge-gain" : "badge-loss"}`}>
+                            {isGain ? <FiTrendingUp className="w-3 h-3" /> : <FiTrendingDown className="w-3 h-3" />}
+                            {isGain ? "+" : ""}{change.toFixed(2)}%
+                          </span>
+                        ) : (
+                          <span className="text-[var(--foreground-muted)]">N/A</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={8} className="text-center py-12">
+                    <FiSearch className="w-12 h-12 mx-auto mb-4 text-[var(--foreground-muted)]" />
+                    <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
+                    <p className="text-[var(--foreground-muted)]">
+                      Try adjusting your filters or search criteria
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
