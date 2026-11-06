@@ -100,6 +100,9 @@ export const floorsheet_analysis_endpoint = "api/stock-data/floorsheet/analysis/
 // Broker activity tracker
 export const floorsheet_broker_endpoint = "api/stock-data/floorsheet/broker/";
 
+// Per-broker bought / sold / net holdings for a stock over a date range
+export const broker_holdings_endpoint = "api/stock-data/floorsheet/broker-holdings/";
+
 // ============================================
 // NEPSE INDICES API ENDPOINTS
 // ============================================
