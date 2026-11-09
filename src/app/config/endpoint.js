@@ -21,9 +21,6 @@ export const stock_structured_endpoint = "api/stock-data/structured/";
 // PREDICTIONS API ENDPOINTS
 // ============================================
 
-// Generate predictions using ML models
-export const predictions_generate_endpoint = "api/predictions/generate/";
-
 // Add LSTM predictions
 export const predictions_lstm_endpoint = "api/predictions/lstm/";
 
@@ -140,4 +137,3 @@ export const stock_detail_endpoint = "api/stock-data/";
 export const login = "api/accounts/token/";
 export const refresh_token = "api/token/refresh/";
 export const load_stock_data_endpoint = "api/stock-data/fetch/";
-export const predict_stock_data_endpoint = "api/predictions/generate/";

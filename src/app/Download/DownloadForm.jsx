@@ -3,16 +3,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
-import { stock_fetch_endpoint, predictions_generate_endpoint } from "@/app/config/endpoint";
-import { FiDownload, FiCpu, FiCalendar, FiCheckCircle, FiAlertCircle, FiLoader } from "react-icons/fi";
+import { stock_fetch_endpoint } from "@/app/config/endpoint";
+import { FiDownload, FiCalendar, FiCheckCircle, FiAlertCircle, FiLoader } from "react-icons/fi";
 
 export default function DownloadForm({ token }) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [predictionDate, setPredictionDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadMessage, setLoadMessage] = useState({ type: "", text: "" });
-  const [predictMessage, setPredictMessage] = useState({ type: "", text: "" });
   const [stats, setStats] = useState(null);
 
   const handleFetchData = async () => {
@@ -52,37 +50,6 @@ export default function DownloadForm({ token }) {
     }
   };
 
-  const handlePrediction = async () => {
-    try {
-      setLoading(true);
-      setPredictMessage({ type: "info", text: "Generating predictions using ML models..." });
-
-      const url = predictionDate 
-        ? `${BASE_URL}${predictions_generate_endpoint}?date=${predictionDate}`
-        : `${BASE_URL}${predictions_generate_endpoint}`;
-
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token.access}`,
-        },
-      });
-
-      const predictionsCount = response.data.predictions?.length || 0;
-      setPredictMessage({ 
-        type: "success", 
-        text: `Successfully generated predictions for ${predictionsCount} stocks!` 
-      });
-    } catch (error) {
-      console.error("Failed to predict data:", error);
-      setPredictMessage({ 
-        type: "error", 
-        text: error.response?.data?.error || "Failed to generate predictions. Please try again." 
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getMessageStyle = (type) => {
     const styles = {
       success: "bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success)]",
@@ -107,7 +74,7 @@ export default function DownloadForm({ token }) {
           Data Management
         </h1>
         <p className="text-[var(--foreground-muted)]">
-          Fetch stock data and generate ML predictions
+          Fetch stock data from Nepal Stock Exchange
         </p>
       </div>
 
@@ -122,7 +89,7 @@ export default function DownloadForm({ token }) {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid max-w-2xl gap-6">
         {/* Fetch Stock Data Card */}
         <div className="card p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -207,79 +174,15 @@ export default function DownloadForm({ token }) {
             )}
           </div>
         </div>
-
-        {/* Generate Predictions Card */}
-        <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-[var(--color-success)]/20 flex items-center justify-center">
-              <FiCpu className="w-5 h-5 text-[var(--color-success)]" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">Generate Predictions</h2>
-              <p className="text-sm text-[var(--foreground-muted)]">Run LSTM & Random Forest models</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-[var(--foreground-secondary)]">
-                Target Date (Optional)
-              </label>
-              <div className="relative">
-                <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--foreground-muted)]" />
-                <input
-                  type="date"
-                  value={predictionDate}
-                  onChange={(e) => setPredictionDate(e.target.value)}
-                  className="input-field pl-10"
-                />
-              </div>
-              <p className="text-xs text-[var(--foreground-muted)] mt-1">
-                Leave empty to use the latest date in database
-              </p>
-            </div>
-
-            <div className="p-4 rounded-lg bg-[var(--background-secondary)]">
-              <h4 className="font-medium mb-2 text-sm">Prediction Models</h4>
-              <div className="space-y-2 text-sm text-[var(--foreground-muted)]">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[var(--chart-blue)]" />
-                  LSTM (Long Short-Term Memory)
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[var(--chart-orange)]" />
-                  Random Forest Regressor
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handlePrediction}
-              disabled={loading}
-              className="btn-success w-full flex items-center justify-center gap-2"
-            >
-              <FiCpu className="w-5 h-5" />
-              Generate Predictions
-            </button>
-
-            {predictMessage.text && (
-              <div className={`flex items-center gap-2 p-3 rounded-lg border ${getMessageStyle(predictMessage.type)}`}>
-                {getMessageIcon(predictMessage.type)}
-                <span className="text-sm">{predictMessage.text}</span>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Info Card */}
       <div className="card p-6 border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5">
         <h3 className="font-semibold text-[var(--color-accent)] mb-2">How It Works</h3>
         <ol className="list-decimal list-inside space-y-2 text-sm text-[var(--foreground-secondary)]">
-          <li>First, fetch stock data from Nepal Stock Exchange for your desired date range</li>
+          <li>Fetch stock data from Nepal Stock Exchange for your desired date range</li>
           <li>The system will download and store the data, skipping dates that already exist</li>
-          <li>After data is loaded, generate predictions using our ML models</li>
-          <li>Predictions will be stored and displayed on individual stock pages</li>
+          <li>Stored data is displayed on the dashboard and individual stock pages</li>
         </ol>
       </div>
     </div>
