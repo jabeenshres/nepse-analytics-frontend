@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { removeCookies } from "@/app/utils/setCookies";
 import { useState } from "react";
 import { useTheme } from "@/app/lib/ThemeContext";
+import { featuresForSidebar } from "@/app/config/features";
 
 // Icon components
 const Icons = {
@@ -85,7 +86,7 @@ const Icons = {
   ),
 };
 
-function Navbar({ role }) {
+function Navbar({ role, username = "", features = [] }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -107,20 +108,32 @@ function Navbar({ role }) {
     return pathname.startsWith(path);
   };
 
-  const navItems = [
-    { name: "Dashboard", path: "/", icon: Icons.Home, public: true },
-    { name: "Stock Prices", path: "/Sharelist", icon: Icons.Chart, public: true },
-    { name: "Top Stocks", path: "/TopStocks", icon: Icons.TrendingUp, public: true },
-    { name: "NEPSE Indices", path: "/Indices", icon: Icons.Globe, public: true },
-    { name: "Screener", path: "/Screener", icon: Icons.Filter, public: true },
-    { name: "Broker Holdings", path: "/BrokerHoldings", icon: Icons.Broker, public: true },
-    { name: "About", path: "/About", icon: Icons.Info, public: true },
-  ];
+  // Access comes from the backend (/me/), not from hardcoded role checks here.
+  const allowedItems = featuresForSidebar(features);
+  const navItems = allowedItems.filter((item) => item.section === "main");
+  const adminItems = allowedItems.filter((item) => item.section === "admin");
 
-  const adminItems = [
-    { name: "Download Data", path: "/Download", icon: Icons.Download, roles: ["admin", "manager"] },
-    { name: "Users", path: "/Users", icon: Icons.Users, roles: ["admin"] },
-  ];
+  const renderNavItem = (item) => {
+    const IconComponent = Icons[item.icon] || Icons.Home;
+    const active = isActive(item.path);
+    return (
+      <Link
+        key={item.key}
+        href={item.path}
+        onClick={() => setIsOpen(false)}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+          active ? "bg-[var(--color-accent)] text-white" : ""
+        }`}
+        style={!active ? { color: 'var(--sidebar-text)' } : {}}
+        onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
+        onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+      >
+        <IconComponent />
+        <span className="font-medium">{item.label}</span>
+      </Link>
+    );
+  };
+
 
   return (
     <>
@@ -169,60 +182,17 @@ function Navbar({ role }) {
               Navigation
             </p>
             
-            {navItems.map((item) => {
-              const IconComponent = item.icon;
-              const active = isActive(item.path);
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                    active
-                      ? "bg-[var(--color-accent)] text-white"
-                      : ""
-                  }`}
-                  style={!active ? { color: 'var(--sidebar-text)' } : {}}
-                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
-                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <IconComponent />
-                  <span className="font-medium">{item.name}</span>
-                </Link>
-              );
-            })}
+            {navItems.map(renderNavItem)}
 
             {/* Admin Section */}
-            {(role === "admin" || role === "manager") && (
+            {adminItems.length > 0 && (
               <>
                 <div className="pt-4">
                   <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(148, 163, 184, 0.7)" }}>
                     Admin
                   </p>
                 </div>
-                {adminItems.map((item) => {
-                  if (!item.roles.includes(role)) return null;
-                  const IconComponent = item.icon;
-                  const active = isActive(item.path);
-                  return (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                        active
-                          ? "bg-[var(--color-accent)] text-white"
-                          : ""
-                      }`}
-                      style={!active ? { color: 'var(--sidebar-text)' } : {}}
-                      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
-                      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      <IconComponent />
-                      <span className="font-medium">{item.name}</span>
-                    </Link>
-                  );
-                })}
+                {adminItems.map(renderNavItem)}
               </>
             )}
           </div>
@@ -254,14 +224,14 @@ function Navbar({ role }) {
               <div className="space-y-2">
                 <div className="flex items-center gap-3 px-3 py-2">
                   <div className="w-8 h-8 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-white font-bold">
-                    {role.charAt(0).toUpperCase()}
+                    {(username || role).charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-sm font-medium" style={{ color: 'var(--sidebar-text)' }}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                      {username || role.charAt(0).toUpperCase() + role.slice(1)}
                     </p>
-                    <p className="text-xs" style={{ color: "rgba(148, 163, 184, 0.7)" }}>
-                      Logged in
+                    <p className="text-xs capitalize" style={{ color: "rgba(148, 163, 184, 0.7)" }}>
+                      {role}
                     </p>
                   </div>
                 </div>

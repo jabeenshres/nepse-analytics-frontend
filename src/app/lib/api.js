@@ -8,14 +8,9 @@ import { getCookies, setCookies } from "@/app/utils/setCookies";
 export const RefreshToken = async (token) => {
   try {
     const resp = await axios.post(
-      `${BASE_URL}/token/refresh/`,
+      `${BASE_URL}api/token/refresh/`,
       {
         refresh: token.refresh,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token.access}`,
-        },
       }
     );
     const result = resp.data;

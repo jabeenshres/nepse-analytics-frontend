@@ -1,21 +1,17 @@
 "use server"
 import React from "react";
-import { cookies } from "next/headers";
 import Navbar from "./navbar";
+import { getMe } from "@/app/lib/auth";
 
 export default async function Sidebar() {
-  const cookieStore = await cookies();
+  // The backend owns access rules; the sidebar only renders what /me/ allows.
+  const me = await getMe();
 
-  let role = "not-login";
-  try {
-    const token = JSON.parse(cookieStore.get("token")?.value);
-
-    if (token) {
-      role = token?.role ?? "not-login";
-    }
-  } catch (error) {
-    role = "not-login";
-  }
-  
-  return <Navbar role={role} />;
+  return (
+    <Navbar
+      role={me?.role || "not-login"}
+      username={me?.username || ""}
+      features={me?.features || []}
+    />
+  );
 }
