@@ -2,8 +2,11 @@ import TopStocksClient from "./TopStocksClient";
 import { BASE_URL } from "../config/constraints";
 import { top_stocks_endpoint, breakout_watchlist_endpoint, accumulation_alerts_endpoint } from "../config/endpoint";
 import axios from "axios";
+import { requireFeature, authHeaders } from "@/app/lib/auth";
 
 export default async function TopStocksPage({ searchParams }) {
+  await requireFeature("top_stocks");
+  const headers = await authHeaders();
   const params = await searchParams;
   const symbol = params?.symbol || "";
   const minScore = params?.min_score || "40";
@@ -21,7 +24,7 @@ export default async function TopStocksPage({ searchParams }) {
       // Fetch single stock analysis with date if provided
       let url = `${BASE_URL}${top_stocks_endpoint}?symbol=${symbol}`;
       if (analysisDate) url += `&date=${analysisDate}`;
-      const res = await axios.get(url);
+      const res = await axios.get(url, { headers });
       singleStock = res.data;
     } else {
       // Fetch top stocks list with stock_type and date filters
@@ -36,9 +39,9 @@ export default async function TopStocksPage({ searchParams }) {
       
       // Fetch all three in parallel - retry logic in backend handles database locks
       const [topRes, breakoutRes, alertsRes] = await Promise.all([
-        axios.get(topUrl),
-        axios.get(breakoutUrl),
-        axios.get(alertsUrl),
+        axios.get(topUrl, { headers }),
+        axios.get(breakoutUrl, { headers }),
+        axios.get(alertsUrl, { headers }),
       ]);
       topStocks = topRes.data;
       breakoutWatchlist = breakoutRes.data;

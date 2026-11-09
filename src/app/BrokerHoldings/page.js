@@ -2,10 +2,13 @@ import BrokerHoldingsClient from "./BrokerHoldingsClient";
 import { BASE_URL } from "../config/constraints";
 import { broker_holdings_endpoint } from "../config/endpoint";
 import axios from "axios";
+import { requireFeature, authHeaders } from "@/app/lib/auth";
 
 const DEFAULT_SYMBOL = "KKHC";
 
 export default async function BrokerHoldingsPage({ searchParams }) {
+  await requireFeature("broker_holdings");
+  const headers = await authHeaders();
   const params = await searchParams;
 
   const symbol = (params?.symbol || DEFAULT_SYMBOL).toUpperCase();
@@ -33,7 +36,7 @@ export default async function BrokerHoldingsPage({ searchParams }) {
     if (startDate) query.set("start_date", startDate);
     if (endDate) query.set("end_date", endDate);
 
-    const res = await axios.get(`${BASE_URL}${broker_holdings_endpoint}?${query.toString()}`);
+    const res = await axios.get(`${BASE_URL}${broker_holdings_endpoint}?${query.toString()}`, { headers });
     data = res.data;
   } catch (err) {
     // Surface the API's own message when it sent one, so a bad symbol or a

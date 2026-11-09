@@ -1,18 +1,15 @@
 import React from "react";
-import { authorization } from "../hoc/auth";
-import { redirect } from "next/navigation";
 import DownloadForm from "./DownloadForm";
-export default async function Download() {
-  const token = await authorization();
-  console.log("role", token.role);
+import { requireFeature, getToken } from "@/app/lib/auth";
 
-  if (token.role !== "admin" && token.role !== "manager") {
-    redirect("/");
-  }
+export default async function Download() {
+  // Access is defined in accounts/access_config.py, not here.
+  const me = await requireFeature("download");
+  const token = await getToken();
 
   return (
     <div>
-      <DownloadForm token={token} />
+      <DownloadForm token={token || { username: me.username }} />
     </div>
   );
 }

@@ -4,8 +4,11 @@ import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
 import { stock_latest_endpoint } from "../config/endpoint";
 import Pagination from "@/components/Pagination/pagination";
+import { requireFeature, authHeaders } from "@/app/lib/auth";
 
 export default async function Sharelist({ searchParams }) {
+  await requireFeature("sharelist");
+  const headers = await authHeaders();
   const searchparam = await searchParams;
   const search = searchparam?.search || "";
   const gainer = searchparam?.gainer || "";
@@ -24,7 +27,7 @@ export default async function Sharelist({ searchParams }) {
     if (gainer) url += `&gainer=${gainer}`;
     if (date) url += `&date=${date}`;
 
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, { headers });
     results = data.results || [];
     count = data.count || 0;
     

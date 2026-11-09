@@ -8,7 +8,7 @@ import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
 import { analysis_signals_endpoint, analysis_indicators_endpoint } from "@/app/config/endpoint";
 
-const ShareDataDisplay = ({ sharedata }) => {
+const ShareDataDisplay = ({ sharedata, accessToken }) => {
   const validatedata = useMemo(() => sharedata.data || [], [sharedata.data]);
   const [visibleCount, setVisibleCount] = useState(5);
   const [lineGraphData, setLineGraphData] = useState(null);
@@ -49,10 +49,13 @@ const ShareDataDisplay = ({ sharedata }) => {
   useEffect(() => {
     const fetchAnalysis = async () => {
       setLoading(true);
+      const authConfig = accessToken
+        ? { headers: { Authorization: `Bearer ${accessToken}` } }
+        : {};
       try {
         const [signalsRes, indicatorsRes] = await Promise.all([
-          axios.get(`${BASE_URL}${analysis_signals_endpoint}?symbol=${sharedata.symbol}`),
-          axios.get(`${BASE_URL}${analysis_indicators_endpoint}?symbol=${sharedata.symbol}&days=30`),
+          axios.get(`${BASE_URL}${analysis_signals_endpoint}?symbol=${sharedata.symbol}`, authConfig),
+          axios.get(`${BASE_URL}${analysis_indicators_endpoint}?symbol=${sharedata.symbol}&days=30`, authConfig),
         ]);
         setSignals(signalsRes.data);
         setIndicators(indicatorsRes.data);
@@ -65,7 +68,7 @@ const ShareDataDisplay = ({ sharedata }) => {
     if (sharedata.symbol) {
       fetchAnalysis();
     }
-  }, [sharedata.symbol]);
+  }, [sharedata.symbol, accessToken]);
 
   // Prepare line graph data
   useEffect(() => {

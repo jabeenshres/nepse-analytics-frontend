@@ -3,15 +3,19 @@ import axios from "axios";
 import ShareDataDisplay from "./detailsPage";
 import { BASE_URL } from "@/app/config/constraints";
 import { stock_detail_endpoint } from "@/app/config/endpoint";
+import { requireFeature, authHeaders, getToken } from "@/app/lib/auth";
 
 export default async function Page({ params }) {
+  await requireFeature("sharelist");
+  const headers = await authHeaders();
+  const token = await getToken();
+
   const { slug } = await params;
 
   let sharedata = null;
 
   try {
-    // Fetch stock details - API is public, no auth required
-    const response = await axios.get(`${BASE_URL}${stock_detail_endpoint}${slug}/`);
+    const response = await axios.get(`${BASE_URL}${stock_detail_endpoint}${slug}/`, { headers });
     sharedata = response.data;
   } catch (error) {
     console.error("Error fetching stock details:", error.message);
@@ -23,5 +27,6 @@ export default async function Page({ params }) {
     };
   }
 
-  return <ShareDataDisplay sharedata={sharedata} />;
+  // The analysis panels fetch from the browser, so they need the access token.
+  return <ShareDataDisplay sharedata={sharedata} accessToken={token?.access} />;
 }
