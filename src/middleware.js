@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isPublicPath } from "./src/app/config/features";
+import { isPublicPath } from "./app/config/features";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:8000/";
 const COOKIE_NAME = "token";
@@ -35,6 +35,14 @@ async function refreshAccess(refresh) {
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
+
+  // Signup is disabled for now. Redirect at the edge so the route never renders.
+  if (pathname === "/Signup") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/Login";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   if (isPublicPath(pathname)) {
     return NextResponse.next();
