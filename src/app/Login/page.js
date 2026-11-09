@@ -130,6 +130,8 @@ export default function Login() {
             </button>
           </form>
 
+          {/* Signup is disabled for now: only invited/admin-created accounts can log in.
+          Re-enable this block together with src/app/Signup/page.js.
           <div className="mt-6 text-center">
             <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
               Don&apos;t have an account?{" "}
@@ -138,6 +140,7 @@ export default function Login() {
               </Link>
             </p>
           </div>
+          */}
         </div>
 
         {/* Footer */}

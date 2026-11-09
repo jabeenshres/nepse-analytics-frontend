@@ -1,6 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import Sidebar from "@/components/Navbar/sidebar";
+import AppShell from "@/components/AppShell/appShell";
 import { ThemeProvider } from "./lib/ThemeContext";
 import { Suspense } from "react";
 import LoadingBar from "@/components/LoadingBar/LoadingBar";
@@ -63,10 +64,9 @@ export default async function RootLayout({ children }) {
           <Suspense fallback={null}>
             <LoadingBar />
           </Suspense>
-          <Sidebar />
-          <div className="p-4 sm:ml-64 min-h-screen">
+          <AppShell sidebar={<Sidebar />}>
             {children}
-          </div>
+          </AppShell>
         </ThemeProvider>
       </body>
     </html>
