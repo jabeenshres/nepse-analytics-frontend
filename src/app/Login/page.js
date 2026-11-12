@@ -1,20 +1,21 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BASE_URL } from "../config/constraints";
-import axios from "axios";
-import { setCookies } from "@/app/utils/setCookies";
-import { login } from "../config/endpoint";
 import Link from "next/link";
 import Image from "next/image";
 import { FiLock, FiUser, FiLogIn, FiAlertCircle } from "react-icons/fi";
+
+/** Only allow same-site relative redirects (blocks //evil.com, https://...). */
+function safeNextPath() {
+  if (typeof window === "undefined") return "/";
+  const next = new URLSearchParams(window.location.search).get("next") || "/";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+}
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,19 +23,26 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${BASE_URL}${login}`, {
-        username,
-        password,
+      // Same-origin route: it calls Django over loopback, sets the httpOnly
+      // cookie, and returns before we navigate.
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
-      const token = response.data;
-      await setCookies("token", JSON.stringify(token));
-      router.push("/");
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(
-        err?.response?.data?.error ||
-          "No active account found with the given credentials"
-      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setError(data.error || "Login failed. Please try again.");
+        return;
+      }
+
+      // Hard navigation: bypasses the client router cache, which may still hold
+      // an unauthenticated prefetch of "/".
+      window.location.assign(safeNextPath());
+    } catch {
+      setError("Unable to reach the login service. Check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +53,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3">
+          <Link href="/" prefetch={false} className="inline-flex items-center gap-3">
             <Image
               src="/images/sharelogom.png"
               width={56}

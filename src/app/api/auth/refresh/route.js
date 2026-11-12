@@ -43,8 +43,8 @@ export async function POST(request) {
   nextResponse.cookies.set(COOKIE_NAME, JSON.stringify(updated), {
     httpOnly: true,
     path: "/",
-    sameSite: "strict",
-    secure: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   });
   return nextResponse;
 }

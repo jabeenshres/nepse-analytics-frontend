@@ -7,6 +7,12 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL ||
   "http://127.0.0.1:8000/";
 const COOKIE_NAME = "token";
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  path: "/",
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+};
 
 function decodeExpiry(jwt) {
   try {
@@ -19,12 +25,17 @@ function decodeExpiry(jwt) {
   }
 }
 
-function loginRedirect(request) {
+function loginRedirect(request, clearCookie = false) {
   const url = request.nextUrl.clone();
   const next = `${request.nextUrl.pathname}${request.nextUrl.search}`;
   url.pathname = "/Login";
   url.search = `?next=${encodeURIComponent(next)}`;
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+  if (clearCookie) {
+    // A broken/expired token must not be retried on every navigation.
+    response.cookies.set(COOKIE_NAME, "", { ...COOKIE_OPTIONS, maxAge: 0 });
+  }
+  return response;
 }
 
 async function refreshAccess(refresh) {
@@ -61,7 +72,7 @@ export async function middleware(request) {
   try {
     token = JSON.parse(raw);
   } catch {
-    return loginRedirect(request);
+    return loginRedirect(request, true);
   }
 
   const expiresAt = decodeExpiry(token?.access || "");
@@ -96,17 +107,12 @@ export async function middleware(request) {
       requestHeaders.set("cookie", kept.join("; "));
 
       const response = NextResponse.next({ request: { headers: requestHeaders } });
-      response.cookies.set(COOKIE_NAME, JSON.stringify(updated), {
-        httpOnly: true,
-        path: "/",
-        sameSite: "strict",
-        secure: true,
-      });
+      response.cookies.set(COOKIE_NAME, JSON.stringify(updated), COOKIE_OPTIONS);
       return response;
     }
   }
 
-  return loginRedirect(request);
+  return loginRedirect(request, true);
 }
 
 export const config = {

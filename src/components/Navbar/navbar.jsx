@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { removeCookies } from "@/app/utils/setCookies";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useTheme } from "@/app/lib/ThemeContext";
 import { featuresForSidebar } from "@/app/config/features";
@@ -87,20 +86,18 @@ const Icons = {
 };
 
 function Navbar({ role, username = "", features = [] }) {
-  const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
-      await removeCookies("token");
-      setTimeout(() => {
-        router.push("/Login");
-      }, 500);
+      await fetch("/api/auth/logout", { method: "POST" });
     } catch (error) {
       console.error("Error during logout:", error);
     }
+    // Hard navigation so the cleared cookie and the router cache cannot disagree.
+    window.location.assign("/Login");
   };
 
   const isActive = (path) => {
