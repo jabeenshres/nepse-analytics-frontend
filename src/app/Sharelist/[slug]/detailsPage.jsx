@@ -3,7 +3,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { FiArrowLeft, FiTrendingUp, FiTrendingDown, FiActivity, FiTarget, FiBarChart2, FiInfo } from "react-icons/fi";
 import CandlestickChart from "@/components/CandleStick/candlestick";
-import LineGraph from "@/components/LineGraph/LIneGraph";
+import dynamic from "next/dynamic";
+
+// Chart.js is heavy and the chart is below the fold; keep it out of the
+// route's initial JS (was ~74 kB on top of the shared bundle).
+const LineGraph = dynamic(() => import("@/components/LineGraph/LIneGraph"), {
+  ssr: false,
+  loading: () => <div className="h-64 skeleton" />,
+});
 import axios from "axios";
 import { BASE_URL } from "@/app/config/constraints";
 import { analysis_signals_endpoint, analysis_indicators_endpoint } from "@/app/config/endpoint";

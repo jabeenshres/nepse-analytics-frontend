@@ -7,7 +7,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { BASE_URL } from "@/app/config/constraints";
+import { SERVER_BASE_URL } from "@/app/config/constraints";
 
 export const TOKEN_COOKIE = "token";
 
@@ -40,9 +40,10 @@ export const getMe = cache(async () => {
   if (!token?.access) return null;
 
   try {
-    const response = await fetch(`${BASE_URL}api/accounts/me/`, {
+    const response = await fetch(`${SERVER_BASE_URL}api/accounts/me/`, {
       headers: { Authorization: `Bearer ${token.access}` },
       cache: "no-store",
+      signal: AbortSignal.timeout(8000),
     });
     if (!response.ok) return null;
     return await response.json();

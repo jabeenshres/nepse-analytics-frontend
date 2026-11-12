@@ -1,5 +1,5 @@
 import Homedesign from "./homedesign";
-import { BASE_URL } from "../config/constraints";
+import { SERVER_BASE_URL } from "../config/constraints";
 import { stock_latest_endpoint, top_stocks_endpoint, indices_list_endpoint, indices_data_endpoint } from "../config/endpoint";
 import axios from "axios";
 import { requireFeature, authHeaders } from "@/app/lib/auth";
@@ -15,42 +15,35 @@ export default async function Homee() {
   let indices = { indices: [] };
   let nepseIndex = null;
 
-  try {
-    // Fetch gainers and losers - ONLY regular stocks (stock_type=stock)
-    const [gainerRes, looserRes] = await Promise.all([
-      axios.get(`${BASE_URL}${stock_latest_endpoint}?gainer=1&page_size=5&stock_type=stock`, { headers }),
-      axios.get(`${BASE_URL}${stock_latest_endpoint}?gainer=0&page_size=5&stock_type=stock`, { headers }),
-    ]);
-    gainer = gainerRes.data;
-    looser = looserRes.data;
-  } catch (err) {
-    console.error("Error fetching gainers/losers:", err.message);
-  }
+  // Fetch everything in parallel; one failing call must not block the rest.
+  // (Sequential awaits made the dashboard pay the sum of five round trips.)
+  const requests = [
+    axios.get(`${SERVER_BASE_URL}${stock_latest_endpoint}?gainer=1&page_size=5&stock_type=stock`, { headers, timeout: 8000 }),
+    axios.get(`${SERVER_BASE_URL}${stock_latest_endpoint}?gainer=0&page_size=5&stock_type=stock`, { headers, timeout: 8000 }),
+    axios.get(`${SERVER_BASE_URL}${top_stocks_endpoint}?limit=6&min_score=40&stock_type=stock`, { headers, timeout: 8000 }),
+    axios.get(`${SERVER_BASE_URL}${indices_list_endpoint}`, { headers, timeout: 8000 }),
+    axios.get(`${SERVER_BASE_URL}${indices_data_endpoint}?index_id=58&limit=1`, { headers, timeout: 8000 }),
+  ];
 
-  try {
-    // Fetch top stocks to watch - ONLY regular stocks (stock_type=stock)
-    const topStocksRes = await axios.get(`${BASE_URL}${top_stocks_endpoint}?limit=6&min_score=40&stock_type=stock`, { headers });
-    topStocks = topStocksRes.data;
-  } catch (err) {
-    console.error("Error fetching top stocks:", err.message);
-  }
+  const [gainerRes, looserRes, topStocksRes, indicesRes, nepseRes] =
+    await Promise.allSettled(requests);
 
-  try {
-    // Fetch NEPSE indices list
-    const indicesRes = await axios.get(`${BASE_URL}${indices_list_endpoint}`, { headers });
-    indices = indicesRes.data;
-  } catch (err) {
-    console.error("Error fetching indices:", err.message);
-  }
+  if (gainerRes.status === "fulfilled") gainer = gainerRes.value.data;
+  else console.error("Error fetching gainers:", gainerRes.reason?.message);
 
-  try {
-    // Fetch NEPSE Index (58) latest data directly for more detail
-    const nepseRes = await axios.get(`${BASE_URL}${indices_data_endpoint}?index_id=58&limit=1`, { headers });
-    if (nepseRes.data?.data?.length > 0) {
-      nepseIndex = nepseRes.data.data[0];
-    }
-  } catch (err) {
-    console.error("Error fetching NEPSE index:", err.message);
+  if (looserRes.status === "fulfilled") looser = looserRes.value.data;
+  else console.error("Error fetching losers:", looserRes.reason?.message);
+
+  if (topStocksRes.status === "fulfilled") topStocks = topStocksRes.value.data;
+  else console.error("Error fetching top stocks:", topStocksRes.reason?.message);
+
+  if (indicesRes.status === "fulfilled") indices = indicesRes.value.data;
+  else console.error("Error fetching indices:", indicesRes.reason?.message);
+
+  if (nepseRes.status === "fulfilled" && nepseRes.value.data?.data?.length > 0) {
+    nepseIndex = nepseRes.value.data.data[0];
+  } else if (nepseRes.status === "rejected") {
+    console.error("Error fetching NEPSE index:", nepseRes.reason?.message);
   }
 
   return (

@@ -1,5 +1,5 @@
 import TopStocksClient from "./TopStocksClient";
-import { BASE_URL } from "../config/constraints";
+import { SERVER_BASE_URL } from "../config/constraints";
 import { top_stocks_endpoint, breakout_watchlist_endpoint, accumulation_alerts_endpoint } from "../config/endpoint";
 import axios from "axios";
 import { requireFeature, authHeaders } from "@/app/lib/auth";
@@ -22,26 +22,26 @@ export default async function TopStocksPage({ searchParams }) {
   try {
     if (symbol) {
       // Fetch single stock analysis with date if provided
-      let url = `${BASE_URL}${top_stocks_endpoint}?symbol=${symbol}`;
+      let url = `${SERVER_BASE_URL}${top_stocks_endpoint}?symbol=${symbol}`;
       if (analysisDate) url += `&date=${analysisDate}`;
-      const res = await axios.get(url, { headers });
+      const res = await axios.get(url, { headers, timeout: 8000 });
       singleStock = res.data;
     } else {
       // Fetch top stocks list with stock_type and date filters
-      let topUrl = `${BASE_URL}${top_stocks_endpoint}?limit=${limit}&min_score=${minScore}&stock_type=${stockType}`;
+      let topUrl = `${SERVER_BASE_URL}${top_stocks_endpoint}?limit=${limit}&min_score=${minScore}&stock_type=${stockType}`;
       if (analysisDate) topUrl += `&date=${analysisDate}`;
       
-      let breakoutUrl = `${BASE_URL}${breakout_watchlist_endpoint}?stock_type=${stockType}`;
+      let breakoutUrl = `${SERVER_BASE_URL}${breakout_watchlist_endpoint}?stock_type=${stockType}`;
       if (analysisDate) breakoutUrl += `&date=${analysisDate}`;
       
-      let alertsUrl = `${BASE_URL}${accumulation_alerts_endpoint}?alert_level=high&stock_type=${stockType}`;
+      let alertsUrl = `${SERVER_BASE_URL}${accumulation_alerts_endpoint}?alert_level=high&stock_type=${stockType}`;
       if (analysisDate) alertsUrl += `&date=${analysisDate}`;
       
       // Fetch all three in parallel - retry logic in backend handles database locks
       const [topRes, breakoutRes, alertsRes] = await Promise.all([
-        axios.get(topUrl, { headers }),
-        axios.get(breakoutUrl, { headers }),
-        axios.get(alertsUrl, { headers }),
+        axios.get(topUrl, { headers, timeout: 8000 }),
+        axios.get(breakoutUrl, { headers, timeout: 8000 }),
+        axios.get(alertsUrl, { headers, timeout: 8000 }),
       ]);
       topStocks = topRes.data;
       breakoutWatchlist = breakoutRes.data;

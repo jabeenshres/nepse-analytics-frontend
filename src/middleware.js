@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { isPublicPath } from "./app/config/features";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:8000/";
+// Middleware runs on the server: prefer the loopback origin when configured.
+const BASE_URL =
+  process.env.API_INTERNAL_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "http://127.0.0.1:8000/";
 const COOKIE_NAME = "token";
 
 function decodeExpiry(jwt) {

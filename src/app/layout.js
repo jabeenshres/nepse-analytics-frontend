@@ -17,17 +17,8 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const robertoitalic = localFont({
-  src: "./fonts/Robertoitalic.ttf",
-  variable: "--font-roboto-italic",
-  weight: "100 900",
-});
-
-const robertV = localFont({
-  src: "./fonts/Roberto.ttf",
-  variable: "--font-roboto-variable",
-  weight: "100 900",
-});
+// The Roboto TTFs were declared but never referenced by any style or component;
+// next/font preloaded ~944 KB on every first visit. Removed until actually used.
 
 export const metadata = {
   title: "Share Nepal - Stock Analysis Platform",
@@ -57,7 +48,7 @@ export default async function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${robertV.variable} ${robertoitalic.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ background: 'var(--background)', color: 'var(--foreground)' }}
       >
         <ThemeProvider>

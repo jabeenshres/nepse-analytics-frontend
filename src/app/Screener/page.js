@@ -1,5 +1,5 @@
 import ScreenerClient from "./ScreenerClient";
-import { BASE_URL } from "../config/constraints";
+import { SERVER_BASE_URL } from "../config/constraints";
 import { analysis_screener_endpoint } from "../config/endpoint";
 import axios from "axios";
 import { requireFeature, authHeaders } from "@/app/lib/auth";
@@ -17,11 +17,11 @@ export default async function ScreenerPage({ searchParams }) {
   let screenerResults = { results: [] };
 
   try {
-    let url = `${BASE_URL}${analysis_screener_endpoint}?type=${type}&limit=${limit}&stock_type=${stockType}`;
+    let url = `${SERVER_BASE_URL}${analysis_screener_endpoint}?type=${type}&limit=${limit}&stock_type=${stockType}`;
     if (minPrice) url += `&min_price=${minPrice}`;
     if (maxPrice) url += `&max_price=${maxPrice}`;
     
-    const res = await axios.get(url, { headers });
+    const res = await axios.get(url, { headers, timeout: 8000 });
     screenerResults = res.data;
   } catch (err) {
     console.error("Error fetching screener:", err.message);

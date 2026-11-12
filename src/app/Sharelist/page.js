@@ -1,7 +1,7 @@
 import React from "react";
 import FetchTable from "./fetchtable";
 import axios from "axios";
-import { BASE_URL } from "@/app/config/constraints";
+import { SERVER_BASE_URL } from "@/app/config/constraints";
 import { stock_latest_endpoint } from "../config/endpoint";
 import Pagination from "@/components/Pagination/pagination";
 import { requireFeature, authHeaders } from "@/app/lib/auth";
@@ -22,17 +22,18 @@ export default async function Sharelist({ searchParams }) {
 
   try {
     // Build the query string with stock_type filter
-    let url = `${BASE_URL}${stock_latest_endpoint}?page=${page}&stock_type=${stockType}`;
+    let url = `${SERVER_BASE_URL}${stock_latest_endpoint}?page=${page}&stock_type=${stockType}`;
     if (search) url += `&search=${search}`;
     if (gainer) url += `&gainer=${gainer}`;
     if (date) url += `&date=${date}`;
 
-    const { data } = await axios.get(url, { headers });
+    const { data } = await axios.get(url, { headers, timeout: 8000 });
     results = data.results || [];
     count = data.count || 0;
     
-    // Calculate total pages
-    const pageSize = results.length || 20;
+    // StockDataPagination defaults to 50 per page; using results.length breaks
+    // the last page (it is shorter than the real page size).
+    const pageSize = 50;
     totalPages = Math.ceil(count / pageSize) || 1;
   } catch (err) {
     console.error("Error fetching stock list:", err.message);

@@ -1,5 +1,5 @@
 import BrokerHoldingsClient from "./BrokerHoldingsClient";
-import { BASE_URL } from "../config/constraints";
+import { SERVER_BASE_URL } from "../config/constraints";
 import { broker_holdings_endpoint } from "../config/endpoint";
 import axios from "axios";
 import { requireFeature, authHeaders } from "@/app/lib/auth";
@@ -36,7 +36,7 @@ export default async function BrokerHoldingsPage({ searchParams }) {
     if (startDate) query.set("start_date", startDate);
     if (endDate) query.set("end_date", endDate);
 
-    const res = await axios.get(`${BASE_URL}${broker_holdings_endpoint}?${query.toString()}`, { headers });
+    const res = await axios.get(`${SERVER_BASE_URL}${broker_holdings_endpoint}?${query.toString()}`, { headers, timeout: 8000 });
     data = res.data;
   } catch (err) {
     // Surface the API's own message when it sent one, so a bad symbol or a
